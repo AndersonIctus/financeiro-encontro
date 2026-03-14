@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: financeiro_encontro_postgres
+    environment:
+      POSTGRES_DB: financeiro_encontro
+      POSTGRES_USER: financeiro
+      POSTGRES_PASSWORD: financeiro123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    container_name: financeiro_encontro_backend
+    environment:
+      DATABASE_URL: postgresql://financeiro:financeiro123@postgres:5432/financeiro_encontro
+      JWT_SECRET: financeiro_encontro_secret
+      JWT_EXPIRE_MINUTES: 60
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: financeiro_encontro_frontend
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: financeiro_encontro_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: financeiro_encontro_postgres
+    environment:
+      POSTGRES_DB: financeiro_encontro
+      POSTGRES_USER: financeiro
+      POSTGRES_PASSWORD: financeiro
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
