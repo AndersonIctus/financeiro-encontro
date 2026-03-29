@@ -1,0 +1,5 @@
+Generic single-database configuration.
+
+comandos:
+- gerar: alembic revision --autogenerate -m "initial migration"
+- atualizar: alembic upgrade head

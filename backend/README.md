@@ -1,196 +1,220 @@
-# Financeiro Encontro --- Backend
+# Financeiro Encontro — Backend
 
-Backend do sistema **Financeiro Encontro**, uma aplicação desenvolvida
-para auxiliar na gestão financeira de eventos da igreja.
+Backend do sistema **Financeiro Encontro**, responsável por gerenciar toda a lógica financeira do evento.
 
-O sistema permite registrar **entradas e saídas financeiras**,
-acompanhar pagamentos realizados via **PIX, dinheiro e cartão**, além de
-permitir a **conciliação de extratos bancários** e geração de relatórios
-financeiros.
+Este serviço fornece uma API REST para controle de:
 
-Este backend fornece uma **API REST** construída com FastAPI que será
-consumida por um frontend Angular.
+- Entradas e saídas financeiras
+- Formas de pagamento (PIX, dinheiro, cartão)
+- Finalidades (oferta, campanha, inscrição)
+- Importação e conciliação de extratos bancários
+- Relatórios financeiros
 
-------------------------------------------------------------------------
+---
 
-# Objetivo do Sistema
+# 📌 Objetivo
 
-Durante a organização de um encontro da igreja existem várias
-movimentações financeiras:
+Este backend foi desenvolvido para garantir:
 
--   Ofertas
--   Campanhas
--   Inscrições
--   Pagamentos diversos
--   Despesas operacionais
+- organização financeira do evento
+- rastreabilidade das movimentações
+- facilidade na prestação de contas
+- base para relatórios contábeis
 
-O objetivo deste sistema é **centralizar e registrar todas essas
-movimentações**, permitindo:
+---
 
--   controle financeiro do evento
--   rastreamento de pagamentos
--   conciliação com extratos bancários
--   geração de relatórios financeiros
+# 🧱 Tecnologias Utilizadas
 
-------------------------------------------------------------------------
+- Python 3.11
+- FastAPI
+- SQLAlchemy 2.0
+- Pydantic
+- PostgreSQL
+- Pandas (processamento de CSV)
+- Docker
 
-# Tecnologias Utilizadas
+---
 
-Backend
+# 🏗️ Arquitetura
 
--   Python 3.11
--   FastAPI
--   SQLAlchemy
--   Pydantic
--   PostgreSQL
--   Pandas
+O backend segue uma **arquitetura em camadas**, separando responsabilidades:
 
-Infraestrutura
+```
+app/
+│
+├── core/          # Configurações e segurança
+├── database/      # Conexão com banco
+├── models/        # Entidades do banco
+├── schemas/       # Validação de dados (Pydantic)
+├── repositories/  # Acesso ao banco (futuro)
+├── services/      # Regras de negócio
+├── routers/       # Endpoints HTTP
+├── utils/         # Funções auxiliares
+│
+└── main.py        # Inicialização da aplicação
+```
 
--   Docker
--   Docker Compose
+---
 
-------------------------------------------------------------------------
+# 🔄 Fluxo da Aplicação
 
-# Arquitetura do Backend
+```
+Request → Router → Service → Model → Banco
+```
 
-O backend segue uma arquitetura organizada em camadas para facilitar
-manutenção e evolução do sistema.
+---
 
-Estrutura principal:
+# 🗄️ Banco de Dados
 
-backend/
+Banco utilizado:
 
-app/ core/ database/ models/ schemas/ routers/ services/ utils/
+- PostgreSQL
 
-main.py
+⚠️ IMPORTANTE:
 
-Descrição das camadas:
+O backend **depende do banco rodando via Docker**.
 
-core\
-Configurações globais da aplicação.
+---
 
-database\
-Configuração de conexão com o banco de dados.
+# 🚀 Como rodar o backend
 
-models\
-Entidades do banco de dados (SQLAlchemy).
+## 1. Subir o banco
 
-schemas\
-Validação de dados usando Pydantic.
+Na raiz do projeto:
 
-routers\
-Endpoints HTTP da API.
-
-services\
-Regras de negócio da aplicação.
-
-utils\
-Funções utilitárias.
-
-main.py\
-Ponto de entrada da aplicação FastAPI.
-
-------------------------------------------------------------------------
-
-# Dependência do Banco de Dados
-
-O backend depende de um banco **PostgreSQL rodando em Docker**.
-
-Sem o banco ativo o backend **não conseguirá iniciar corretamente**.
-
-Para subir o banco execute na raiz do projeto:
-
+```bash
 docker compose -f docker-compose-db.yml up -d
-
-Verifique se o container está rodando:
-
-docker ps
-
-------------------------------------------------------------------------
-
-# Rodando o Backend Localmente
-
-Entre na pasta do backend:
-
-```cd backend```
-
-Crie um ambiente virtual:
-
-```python -m venv venv```
-
-Ative o ambiente virtual.
-
-Linux ou Mac:
-
-```source venv/bin/activate```
-
-Windows:
-
-```venv`\Scripts`{=tex}`\activate`{=tex}```
-
-Instale as dependências:
-
-```pip install -r requirements.txt```
-
-Inicie o servidor:
-
-```uvicorn app.main:app --reload```
-
-------------------------------------------------------------------------
-
-# Acessando a API
-
-Documentação Swagger:
-
-```http://localhost:8000/docs```
-
-Health check:
-
-```http://localhost:8000/health```
-
-------------------------------------------------------------------------
-
-# Estrutura de Diretórios
 ```
-backend/
-    app/ 
-        core/ 
-            config.py
-        database/ 
-            base.py 
-            session.py
-        models/ 
-            lancamento.py 
-            finalidade.py 
-            extrato.py
-        schemas/
-        routers/
-        services/
-        utils/
-    main.py
-    requirements.txt 
-    Dockerfile
+
+---
+
+## 2. Rodar backend
+
+```bash
+cd backend
+./start-backend.sh
 ```
-------------------------------------------------------------------------
 
-# Próximas Evoluções do Backend
+Esse script faz automaticamente:
 
-As próximas melhorias planejadas para o sistema incluem:
+- cria o venv (se não existir)
+- ativa o ambiente virtual
+- instala dependências
+- inicia o servidor FastAPI
 
--   migrations com Alembic
--   autenticação JWT
--   paginação de endpoints
--   filtros avançados de lançamentos
--   upload de extratos bancários
--   conciliação automática de pagamentos
--   geração de relatórios financeiros
--   logging estruturado
--   tratamento global de exceções
+---
 
-------------------------------------------------------------------------
+# 🌐 Acessos
 
-# Licença
+API:
 
-Projeto interno desenvolvido para gerenciamento financeiro do encontro
-da igreja.
+http://localhost:8000
+
+Swagger:
+
+http://localhost:8000/docs
+
+Health Check:
+
+http://localhost:8000/health
+
+---
+
+# 📡 Endpoints principais
+
+## Lançamentos
+
+- GET /lancamentos → listar lançamentos
+- POST /lancamentos → criar lançamento
+- PUT /lancamentos → atualizar lançamento
+- DELETE /lancamentos → excluir lançamento
+
+---
+
+## Extrato bancário
+
+- POST /extrato-bancario → importar CSV
+- GET /extrato-bancario → listar extratos
+
+---
+
+## Sistema
+
+- GET /health → verificar status da API
+
+---
+
+# 📥 Conciliação de Extratos
+
+Fluxo:
+
+1. Upload de CSV (Banco Inter)
+2. Backend processa arquivo
+3. Cria lançamentos automaticamente
+4. Marca como NÃO CONCILIADO
+5. Usuário ajusta finalidade depois
+
+---
+
+# ⚠️ Problemas comuns
+
+## Erro: conexão com banco
+
+```
+could not connect to server
+```
+
+✔ Solução:
+
+```bash
+docker compose -f docker-compose-db.yml up -d
+```
+
+---
+
+## Erro: tabela não existe
+
+```
+relation "lancamentos" does not exist
+```
+
+✔ Isso será resolvido na próxima etapa com migrations (Alembic)
+
+---
+
+# 🔐 Segurança (próximos passos)
+
+Planejado:
+
+- autenticação JWT
+- controle de acesso
+- proteção de endpoints
+
+---
+
+# 📈 Evoluções futuras
+
+- Alembic (migrations)
+- autenticação JWT
+- paginação
+- filtros avançados
+- dashboard financeiro
+- geração de relatórios
+- logs estruturados
+- tratamento global de erros
+
+---
+
+# 📌 Observações
+
+Este backend foi projetado para ser:
+
+- simples de usar durante o evento
+- robusto para evitar erros financeiros
+- escalável para futuras melhorias
+
+---
+
+# 📄 Licença
+
+Projeto interno para uso no gerenciamento financeiro do encontro da igreja.
