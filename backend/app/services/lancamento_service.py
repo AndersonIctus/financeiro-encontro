@@ -4,6 +4,8 @@ from app.repositories.lancamento_repository import LancamentoRepository
 from app.schemas.lancamento_schema import LancamentoCreate, LancamentoUpdate
 from app.models.enums import StatusLancamento
 
+from app.schemas.pagination_schema import Page
+
 
 class LancamentoService:
 
@@ -33,5 +35,27 @@ class LancamentoService:
         LancamentoRepository.delete(db, obj)
 
     @staticmethod
-    def list(db: Session, filters: dict, skip: int, limit: int):
-        return LancamentoRepository.list(db, filters, skip, limit)
+    def list_all(db: Session, params):
+        return LancamentoRepository.list_all(db, params)
+    
+    @staticmethod
+    def list(db: Session, params):
+        items, total = LancamentoRepository.list_with_count(db, params)
+
+        return {
+            "items": items,
+            "total": total,
+            "skip": params.skip,
+            "limit": params.limit
+        }
+        
+        
+    @staticmethod
+    def get_by_id(db: Session, lancamento_id: int):
+        obj = LancamentoRepository.get_by_id(db, lancamento_id)
+
+        if not obj:
+            raise Exception("Lançamento não encontrado")
+
+        return obj
+    

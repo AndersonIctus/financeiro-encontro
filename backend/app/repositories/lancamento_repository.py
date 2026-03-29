@@ -1,6 +1,15 @@
 from sqlalchemy.orm import Session
 from app.models.lancamento import Lancamento
 
+from app.utils.sort_utils import apply_sort
+
+SORT_FIELDS = {
+    "valor": Lancamento.valor,
+    "data_pagamento": Lancamento.data_pagamento,
+    "criado_em": Lancamento.criado_em,
+}
+
+DEFAULT_SORT = "data_pagamento:desc"
 
 class LancamentoRepository:
 
@@ -30,19 +39,49 @@ class LancamentoRepository:
         return obj
 
     @staticmethod
-    def list(db: Session, filters: dict, skip: int, limit: int):
+    def list_all(db: Session, params):
         query = db.query(Lancamento)
 
-        if filters.get("data_inicio"):
-            query = query.filter(Lancamento.data_pagamento >= filters["data_inicio"])
+        if params.data_inicio:
+            query = query.filter(Lancamento.data_pagamento >= params.data_inicio)
 
-        if filters.get("data_fim"):
-            query = query.filter(Lancamento.data_pagamento <= filters["data_fim"])
+        if params.data_fim:
+            query = query.filter(Lancamento.data_pagamento <= params.data_fim)
 
-        if filters.get("status"):
-            query = query.filter(Lancamento.status == filters["status"])
+        if params.status:
+            query = query.filter(Lancamento.status == params.status)
 
-        if filters.get("tipo"):
-            query = query.filter(Lancamento.tipo == filters["tipo"])
+        if params.tipo:
+            query = query.filter(Lancamento.tipo == params.tipo)
+        
+        if params.limit > 1000 or params.limit <= 0:
+            params.limit = 1000
 
-        return query.offset(skip).limit(limit).all()
+        query = apply_sort(query, Lancamento, params.sort, SORT_FIELDS, DEFAULT_SORT)
+        
+        return query.offset(params.skip).limit(params.limit).all()
+    
+    @staticmethod
+    def list_with_count(db: Session, params):
+        query = db.query(Lancamento)
+
+        if params.data_inicio:
+            query = query.filter(Lancamento.data_pagamento >= params.data_inicio)
+
+        if params.data_fim:
+            query = query.filter(Lancamento.data_pagamento <= params.data_fim)
+
+        if params.status:
+            query = query.filter(Lancamento.status == params.status)
+
+        if params.tipo:
+            query = query.filter(Lancamento.tipo == params.tipo)
+
+
+        query = apply_sort(query, Lancamento, params.sort, SORT_FIELDS, DEFAULT_SORT)
+
+        total = query.count()
+        items = query.offset(params.skip).limit(params.limit).all()
+
+        return items, total
+    

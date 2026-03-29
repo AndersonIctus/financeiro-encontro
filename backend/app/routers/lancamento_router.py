@@ -11,6 +11,8 @@ from app.schemas.lancamento_schema import (
     LancamentoResponse
 )
 from app.models.enums import StatusLancamento, TipoLancamento
+from app.schemas.pagination_schema import Page
+from app.schemas.lancamento_filter_dto import LancamentoFilterDto
 
 
 router = APIRouter(prefix="/lancamentos", tags=["Lançamentos"])
@@ -29,24 +31,23 @@ def create(data: LancamentoCreate, db: Session = Depends(get_db)):
     return LancamentoService.create(db, data)
 
 
-@router.get("/", response_model=List[LancamentoResponse])
+@router.get("/", response_model=Page[LancamentoResponse])
 def list(
-    data_inicio: Optional[datetime] = None,
-    data_fim: Optional[datetime] = None,
-    status: Optional[StatusLancamento] = None,
-    tipo: Optional[TipoLancamento] = None,
-    skip: int = 0,
-    limit: int = 20,
+    params: LancamentoFilterDto = Depends(),
     db: Session = Depends(get_db),
 ):
-    filters = {
-        "data_inicio": data_inicio,
-        "data_fim": data_fim,
-        "status": status,
-        "tipo": tipo,
-    }
+    return LancamentoService.list(db, params)
 
-    return LancamentoService.list(db, filters, skip, limit)
+@router.get("/all", response_model=List[LancamentoResponse])
+def list_all(
+    params: LancamentoFilterDto = Depends(),
+    db: Session = Depends(get_db),
+):
+    return LancamentoService.list_all(db, params)
+
+@router.get("/{lancamento_id}", response_model=LancamentoResponse)
+def get_by_id(lancamento_id: int, db: Session = Depends(get_db)):
+    return LancamentoService.get_by_id(db, lancamento_id)
 
 
 @router.put("/{lancamento_id}", response_model=LancamentoResponse)
