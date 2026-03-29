@@ -5,6 +5,7 @@ from app.schemas.lancamento_schema import LancamentoCreate, LancamentoUpdate
 from app.models.enums import StatusLancamento
 
 from app.schemas.pagination_schema import Page
+from app.core.exceptions import NotFoundException
 
 
 class LancamentoService:
@@ -20,7 +21,7 @@ class LancamentoService:
         obj = LancamentoRepository.get_by_id(db, lancamento_id)
 
         if not obj:
-            raise Exception("Lançamento não encontrado")
+            raise NotFoundException("Lançamento")
 
         updated = data.model_dump(exclude_unset=True)
         return LancamentoRepository.update(db, obj, updated)
@@ -30,7 +31,7 @@ class LancamentoService:
         obj = LancamentoRepository.get_by_id(db, lancamento_id)
 
         if not obj:
-            raise Exception("Lançamento não encontrado")
+            raise NotFoundException("Lançamento")
 
         LancamentoRepository.delete(db, obj)
 
@@ -55,7 +56,7 @@ class LancamentoService:
         obj = LancamentoRepository.get_by_id(db, lancamento_id)
 
         if not obj:
-            raise Exception("Lançamento não encontrado")
+            raise NotFoundException("Lançamento")
 
         return obj
     
