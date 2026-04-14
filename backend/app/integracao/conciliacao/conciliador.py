@@ -1,6 +1,7 @@
 import hashlib
 
 from app.integracao.conciliacao.factory.parser_factory import ParserFactory
+from app.integracao.conciliacao.models.conciliacao_dto import ConciliacaoDTO
 
 
 class Conciliador:
@@ -24,7 +25,7 @@ class Conciliador:
 
         registros = parser.parse(file_path)
 
-        novos = []
+        novos = [ConciliacaoDTO]
         ignorados = 0
         erros = []
 

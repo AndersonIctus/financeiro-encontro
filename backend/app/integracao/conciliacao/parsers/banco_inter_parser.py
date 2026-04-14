@@ -1,7 +1,6 @@
 from datetime import datetime
-
-from app.models.enums import TipoLancamento, FormaPagamento, StatusLancamento
 from app.integracao.conciliacao.parsers.base_parser import BaseParser
+from app.integracao.conciliacao.models.conciliacao_dto import ConciliacaoDTO
 
 
 class BancoInterParser(BaseParser):
@@ -9,15 +8,15 @@ class BancoInterParser(BaseParser):
     def _to_float(self, valor_str: str) -> float:
         return float(valor_str.replace(".", "").replace(",", "."))
 
-    def _parse_tipo(self, historico: str) -> TipoLancamento:
+    def _parse_tipo(self, historico: str) -> str:
         historico = historico.lower()
 
         if "recebido" in historico:
-            return TipoLancamento.RECEITA
+            return "entrada"
 
-        return TipoLancamento.DESPESA
+        return "saida"
 
-    def parse(self, file_path: str) -> list[dict]:
+    def parse(self, file_path: str) -> list[ConciliacaoDTO]:
         import csv
 
         result = []
@@ -43,16 +42,16 @@ class BancoInterParser(BaseParser):
                 try:
                     data_str, historico, descricao, valor_str, saldo = row
 
-                    result.append({
-                        "descricao": descricao.strip(),
-                        "valor": abs(self._to_float(valor_str)),
-                        "data_pagamento": datetime.strptime(data_str, "%d/%m/%Y"),
-                        "tipo": self._parse_tipo(historico),
-                        "forma_pagamento": FormaPagamento.PIX,
-                        "status": StatusLancamento.NAO_CONCILIADO,
-                        "observacao": historico.strip(),
-                        "finalidade_id": None,
-                    })
+                    dto = ConciliacaoDTO(
+                        descricao=descricao.strip(),
+                        valor=abs(self._to_float(valor_str)),
+                        data=datetime.strptime(data_str, "%d/%m/%Y"),
+                        tipo=self._parse_tipo(historico),
+                        observacao=historico.strip(),
+                        banco="INTER"
+                    )
+
+                    result.append(dto)
 
                 except Exception as e:
                     erros.append({
@@ -61,7 +60,6 @@ class BancoInterParser(BaseParser):
                         "conteudo": row
                     })
 
-        # 🔥 log simples (pode evoluir depois)
         if erros:
             print(f"[Parser] Linhas com erro: {len(erros)}")
             for e in erros:

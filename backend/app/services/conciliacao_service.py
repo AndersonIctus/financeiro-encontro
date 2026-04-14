@@ -4,12 +4,31 @@ from sqlalchemy.orm import Session
 from app.integracao.conciliacao.conciliador import Conciliador
 from app.services.extrato_bancario_service import ExtratoBancarioService
 from app.services.lancamento_service import LancamentoService
-from app.models.enums import StatusProcessamento
+from app.models.enums import FormaPagamento, StatusLancamento, StatusProcessamento, TipoLancamento
 
 
 UPLOAD_DIR = "uploads"
 
 class ConciliacaoService:
+    
+    @staticmethod
+    def _to_lancamento_dict(dto):
+        tipo = (
+            TipoLancamento.RECEITA
+            if dto.tipo == "entrada"
+            else TipoLancamento.DESPESA
+        )
+
+        return {
+            "descricao": dto.descricao,
+            "valor": dto.valor,
+            "tipo": tipo,
+            "forma_pagamento": FormaPagamento.PIX,
+            "status": StatusLancamento.NAO_CONCILIADO,
+            "data_pagamento": dto.data,
+            "observacao": dto.observacao or f"Importado de {dto.banco}",
+            "finalidade_id": None,
+        }
 
     @staticmethod
     def upload_and_process(file, db: Session):
@@ -41,10 +60,13 @@ class ConciliacaoService:
 
             novos_lancamentos = []
 
-            for r in resultado["novos"]:
+            for dto in resultado["novos"]:
                 try:
-                    obj = LancamentoService.create(db, r)
+                    lancamento_data = ConciliacaoService._to_lancamento_dict(dto)
+
+                    obj = LancamentoService.create(db, lancamento_data)
                     novos_lancamentos.append(obj)
+
                 except Exception as e:
                     print(f"[DB ERROR] {e}")
 
