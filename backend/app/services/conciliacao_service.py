@@ -5,6 +5,7 @@ from app.integracao.conciliacao.conciliador import Conciliador
 from app.services.extrato_bancario_service import ExtratoBancarioService
 from app.services.lancamento_service import LancamentoService
 from app.models.enums import FormaPagamento, StatusLancamento, StatusProcessamento, TipoLancamento
+from app.utils.hash_utils import gerar_hash
 
 
 UPLOAD_DIR = "uploads"
@@ -18,6 +19,12 @@ class ConciliacaoService:
             if dto.tipo == "entrada"
             else TipoLancamento.DESPESA
         )
+        
+        hash_value = gerar_hash(
+            dto.descricao,
+            dto.valor,
+            dto.data
+        )
 
         return {
             "descricao": dto.descricao,
@@ -26,6 +33,7 @@ class ConciliacaoService:
             "forma_pagamento": FormaPagamento.PIX,
             "status": StatusLancamento.NAO_CONCILIADO,
             "data_pagamento": dto.data,
+            "hash_transacao": hash_value,
             "observacao": dto.observacao or f"Importado de {dto.banco}",
             "finalidade_id": None,
         }
@@ -49,8 +57,9 @@ class ConciliacaoService:
         })
 
         try:
-            def is_duplicado(hash_value: str) -> bool:
-                return LancamentoService.exists_by_hash(db, hash_value)
+            def is_duplicado(dto) -> bool:
+                data = ConciliacaoService._to_lancamento_dict(dto)
+                return LancamentoService.exists_by_hash(db, data["hash_transacao"])
 
             resultado = Conciliador.processar(
                 file_path,
@@ -80,8 +89,10 @@ class ConciliacaoService:
                 "extrato_id": extrato.id,
                 "total_processado": resultado["total_processado"],
                 "total_inserido": resultado["total_novos"],
-                "total_ignorados": resultado["total_ignorados"],
-                "total_erros": resultado["total_erros"]
+                "total_duplicados": resultado["total_duplicados"],
+                "total_erros": resultado["total_erros"],
+                "duplicados": resultado["duplicados"] if resultado["total_duplicados"] > 0 else [],
+                "erros": resultado["erros"] if resultado["total_erros"] > 0 else []
             }
 
         except Exception as e:

@@ -25,33 +25,36 @@ class Conciliador:
 
         registros = parser.parse(file_path)
 
-        novos = [ConciliacaoDTO]
-        ignorados = 0
+        novos: list[ConciliacaoDTO] = []
+        duplicados = []
         erros = []
 
-        for idx, r in enumerate(registros, start=1):
+        for idx, dto in enumerate(registros, start=1):
             try:
-                hash_value = Conciliador._gerar_hash(r)
-                r["hash_transacao"] = hash_value
-
-                if is_duplicado_callback(hash_value):
-                    ignorados += 1
+                if is_duplicado_callback(dto):
+                    duplicados.append({
+                        "linha": idx,
+                        "descricao": dto.descricao,
+                        "valor": dto.valor,
+                        "data": dto.data.isoformat()
+                    })
                     continue
 
-                novos.append(r)
+                novos.append(dto)
 
             except Exception as e:
                 erros.append({
                     "linha": idx,
                     "erro": str(e),
-                    "conteudo": r
+                    "descricao": dto.descricao if dto else None
                 })
 
         return {
+            "novos": novos,
+            "duplicados": duplicados,
+            "erros": erros,
             "total_processado": len(registros),
             "total_novos": len(novos),
-            "total_ignorados": ignorados,
+            "total_duplicados": len(duplicados),
             "total_erros": len(erros),
-            "novos": novos,
-            "erros": erros
         }
