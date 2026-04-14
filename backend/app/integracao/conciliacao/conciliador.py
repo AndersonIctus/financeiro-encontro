@@ -7,10 +7,7 @@ class Conciliador:
 
     @staticmethod
     def _normalizar_texto(valor: str) -> str:
-        if not valor:
-            return ""
-
-        return valor.strip().lower()  
+        return valor.strip().lower() if valor else ""
 
     @staticmethod
     def _normalizar_valor(valor: float) -> float:
@@ -18,14 +15,7 @@ class Conciliador:
 
     @staticmethod
     def _gerar_hash(lancamento: dict) -> str:
-        descricao = Conciliador._normalizar_texto(lancamento.get("descricao"))
-        observacao = Conciliador._normalizar_texto(lancamento.get("observacao"))
-
-        valor = Conciliador._normalizar_valor(lancamento.get("valor"))
-        data = lancamento.get("data_pagamento")
-
-        base = f"{data}_{valor}_{descricao}_{observacao}"
-
+        base = f"{lancamento['data_pagamento']}_{lancamento['valor']}_{lancamento['descricao']}_{lancamento['observacao']}"
         return hashlib.md5(base.encode()).hexdigest()
 
     @staticmethod
@@ -36,21 +26,31 @@ class Conciliador:
 
         novos = []
         ignorados = 0
+        erros = []
 
-        for r in registros:
-            hash_value = Conciliador._gerar_hash(r)
+        for idx, r in enumerate(registros, start=1):
+            try:
+                hash_value = Conciliador._gerar_hash(r)
+                r["hash_transacao"] = hash_value
 
-            r["hash_transacao"] = hash_value 
+                if is_duplicado_callback(hash_value):
+                    ignorados += 1
+                    continue
 
-            if is_duplicado_callback(hash_value):
-                ignorados += 1
-                continue
+                novos.append(r)
 
-            novos.append(r)
+            except Exception as e:
+                erros.append({
+                    "linha": idx,
+                    "erro": str(e),
+                    "conteudo": r
+                })
 
         return {
             "total_processado": len(registros),
             "total_novos": len(novos),
             "total_ignorados": ignorados,
-            "novos": novos
+            "total_erros": len(erros),
+            "novos": novos,
+            "erros": erros
         }

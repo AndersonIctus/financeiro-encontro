@@ -20,3 +20,4 @@ class StatusLancamento(str, Enum):
 class StatusProcessamento(str, Enum):
     PROCESSANDO = "PROCESSANDO"
     PROCESSADO = "PROCESSADO"
+    ERRO = "ERRO"

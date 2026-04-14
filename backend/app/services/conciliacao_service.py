@@ -17,7 +17,6 @@ class ConciliacaoService:
             raise Exception("Arquivo deve ser CSV")
 
         os.makedirs(UPLOAD_DIR, exist_ok=True)
-
         file_path = os.path.join(UPLOAD_DIR, file.filename)
 
         with open(file_path, "wb") as buffer:
@@ -30,30 +29,45 @@ class ConciliacaoService:
             "status": StatusProcessamento.PROCESSANDO
         })
 
-        def is_duplicado(hash_value: str) -> bool:
-            return LancamentoService.exists_by_hash(db, hash_value)
+        try:
+            def is_duplicado(hash_value: str) -> bool:
+                return LancamentoService.exists_by_hash(db, hash_value)
 
-        resultado = Conciliador.processar(
-            file_path,
-            file.filename,
-            is_duplicado
-        )
+            resultado = Conciliador.processar(
+                file_path,
+                file.filename,
+                is_duplicado
+            )
 
-        novos_lancamentos = []
+            novos_lancamentos = []
 
-        for r in resultado["novos"]:
-            obj = LancamentoService.create(db, r)
-            novos_lancamentos.append(obj)
+            for r in resultado["novos"]:
+                try:
+                    obj = LancamentoService.create(db, r)
+                    novos_lancamentos.append(obj)
+                except Exception as e:
+                    print(f"[DB ERROR] {e}")
 
-        ExtratoBancarioService.update_status(
-            db,
-            extrato.id,
-            StatusProcessamento.PROCESSADO
-        )
+            ExtratoBancarioService.update_status(
+                db,
+                extrato.id,
+                StatusProcessamento.PROCESSADO
+            )
 
-        return {
-            "extrato_id": extrato.id,
-            "total_processado": resultado["total_processado"],
-            "total_inserido": resultado["total_novos"],
-            "total_ignorados": resultado["total_ignorados"]
-        }
+            return {
+                "extrato_id": extrato.id,
+                "total_processado": resultado["total_processado"],
+                "total_inserido": resultado["total_novos"],
+                "total_ignorados": resultado["total_ignorados"],
+                "total_erros": resultado["total_erros"]
+            }
+
+        except Exception as e:
+            # 🔥 erro grave → extrato ERRO
+            ExtratoBancarioService.update_status(
+                db,
+                extrato.id,
+                StatusProcessamento.ERRO
+            )
+
+            raise Exception(f"Erro ao processar arquivo: {str(e)}")

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.repositories.extrato_bancario_repository import ExtratoBancarioRepository
 from app.core.exceptions import NotFoundException
+from datetime import datetime
 
 
 class ExtratoBancarioService:
@@ -33,6 +34,22 @@ class ExtratoBancarioService:
     def create(db: Session, data: dict):
         return ExtratoBancarioRepository.create(db, data)
 
+    @staticmethod
+    def update_status(db: Session, extrato_id: int, status):
+        obj = ExtratoBancarioRepository.get_by_id(db, extrato_id)
+
+        if not obj:
+            raise NotFoundException("Extrato bancário")
+
+        return ExtratoBancarioRepository.update(
+            db,
+            obj,
+            {
+                "status": status, 
+                "processado_em": datetime.utcnow()
+            }
+        )
+        
     @staticmethod
     def delete(db: Session, extrato_id: int):
         obj = ExtratoBancarioRepository.get_by_id(db, extrato_id)

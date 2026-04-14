@@ -86,7 +86,16 @@ class ExtratoBancarioRepository:
         db.commit()
         db.refresh(obj)
         return obj
-    
+
+    @staticmethod
+    def update(db: Session, obj: ExtratoBancario, data: dict):
+        for key, value in data.items():
+            setattr(obj, key, value)
+
+        db.commit()
+        db.refresh(obj)
+        return obj
+       
     @staticmethod
     def delete(db: Session, obj: ExtratoBancario):
         db.delete(obj)
