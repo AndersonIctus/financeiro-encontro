@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
 
 from app.models.enums import StatusLancamento, TipoLancamento
 from app.schemas.query_params import QueryParams

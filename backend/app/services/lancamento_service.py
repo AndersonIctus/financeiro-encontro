@@ -23,7 +23,7 @@ class LancamentoService:
         if not obj:
             raise NotFoundException("Lançamento")
 
-        updated = data.model_dump(exclude_unset=True)
+        updated = data.model_dump(exclude_unset=True, exclude_none=True)
         return LancamentoRepository.update(db, obj, updated)
 
     @staticmethod
@@ -49,7 +49,6 @@ class LancamentoService:
             "skip": params.skip,
             "limit": params.limit
         }
-        
         
     @staticmethod
     def get_by_id(db: Session, lancamento_id: int):

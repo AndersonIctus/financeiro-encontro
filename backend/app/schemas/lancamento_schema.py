@@ -11,7 +11,7 @@ class LancamentoBase(BaseModel):
     forma_pagamento: FormaPagamento
     data_pagamento: datetime
     finalidade_id: Optional[int]
-    observacao: Optional[str]
+    observacao: Optional[str] = None
 
 
 class LancamentoCreate(LancamentoBase):
@@ -19,14 +19,14 @@ class LancamentoCreate(LancamentoBase):
 
 
 class LancamentoUpdate(BaseModel):
-    descricao: Optional[str]
-    valor: Optional[float]
-    tipo: Optional[TipoLancamento]
-    forma_pagamento: Optional[FormaPagamento]
-    status: Optional[StatusLancamento]
-    data_pagamento: Optional[datetime]
-    finalidade_id: Optional[int]
-    observacao: Optional[str]
+    descricao: Optional[str] = None
+    valor: Optional[float] = None
+    tipo: Optional[TipoLancamento] = None
+    forma_pagamento: Optional[FormaPagamento] = None
+    status: Optional[StatusLancamento] = None
+    data_pagamento: Optional[datetime] = None
+    finalidade_id: Optional[int] = None
+    observacao: Optional[str] = None
 
 
 class LancamentoResponse(LancamentoBase):

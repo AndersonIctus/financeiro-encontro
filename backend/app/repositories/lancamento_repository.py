@@ -21,10 +21,7 @@ class LancamentoRepository:
         db.refresh(obj)
         return obj
 
-    @staticmethod
-    def get_by_id(db: Session, lancamento_id: int):
-        return db.query(Lancamento).filter(Lancamento.id == lancamento_id).first()
-
+   
     @staticmethod
     def delete(db: Session, obj: Lancamento):
         db.delete(obj)
@@ -37,6 +34,10 @@ class LancamentoRepository:
         db.commit()
         db.refresh(obj)
         return obj
+
+    @staticmethod
+    def get_by_id(db: Session, lancamento_id: int):
+        return db.query(Lancamento).filter(Lancamento.id == lancamento_id).first()
 
     @staticmethod
     def list_all(db: Session, params):

@@ -13,17 +13,10 @@ from app.schemas.lancamento_schema import (
 from app.models.enums import StatusLancamento, TipoLancamento
 from app.schemas.pagination_schema import Page
 from app.schemas.lancamento_filter_dto import LancamentoFilterDto
+from app.database.session import get_db
 
 
 router = APIRouter(prefix="/lancamentos", tags=["Lançamentos"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/", response_model=LancamentoResponse)
