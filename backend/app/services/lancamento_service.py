@@ -4,8 +4,8 @@ from app.repositories.lancamento_repository import LancamentoRepository
 from app.schemas.lancamento_schema import LancamentoCreate, LancamentoUpdate
 from app.models.enums import StatusLancamento
 
-from app.schemas.pagination_schema import Page
 from app.core.exceptions import NotFoundException
+from app.models.lancamento import Lancamento
 
 
 class LancamentoService:
@@ -13,6 +13,17 @@ class LancamentoService:
     @staticmethod
     def create(db: Session, data: LancamentoCreate):
         payload = data.model_dump()
+        
+        # 🔥 proteção contra duplicação
+        hash_value = data.get("hash_transacao")
+        if "hash" in data:
+            existente = db.query(Lancamento).filter(
+                Lancamento.hash_transacao == hash_value
+            ).first()
+
+            if existente:
+                return existente  # ✅ evita duplicação
+        
         payload["status"] = StatusLancamento.NAO_CONCILIADO
         return LancamentoRepository.create(db, payload)
 
@@ -38,7 +49,7 @@ class LancamentoService:
     @staticmethod
     def list_all(db: Session, params):
         return LancamentoRepository.list_all(db, params)
-    
+
     @staticmethod
     def list(db: Session, params):
         items, total = LancamentoRepository.list_with_count(db, params)
@@ -49,7 +60,7 @@ class LancamentoService:
             "skip": params.skip,
             "limit": params.limit
         }
-        
+
     @staticmethod
     def get_by_id(db: Session, lancamento_id: int):
         obj = LancamentoRepository.get_by_id(db, lancamento_id)
@@ -58,4 +69,7 @@ class LancamentoService:
             raise NotFoundException("Lançamento")
 
         return obj
-    
+
+    @staticmethod
+    def exists_by_hash(db: Session, hash_value: str) -> bool:
+        return db.query(Lancamento).filter(Lancamento.hash_transacao == hash_value).first() is not None
