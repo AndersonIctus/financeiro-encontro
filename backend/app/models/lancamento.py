@@ -1,3 +1,4 @@
+from numpy import True_
 from sqlalchemy import (
     Column,
     Integer,
@@ -50,7 +51,7 @@ class Lancamento(Base):
     forma_pagamento = Column(forma_pagamento_enum, nullable=False)
     status = Column(status_enum, nullable=False, server_default="NAO_CONCILIADO")
     data_pagamento = Column(DateTime, nullable=False)
-    hash_transacao = Column(String(255), nullable=True, unique=True) # 🔥 usado para evitar duplicação via CSV
+    hash_transacao = Column(String(255), nullable=True, unique=True, index=True) # 🔥 usado para evitar duplicação via CSV
     observacao = Column(String(255), nullable=True)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
     atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())

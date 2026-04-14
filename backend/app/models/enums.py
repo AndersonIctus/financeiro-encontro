@@ -15,3 +15,8 @@ class FormaPagamento(str, Enum):
 class StatusLancamento(str, Enum):
     CONCILIADO = "CONCILIADO"
     NAO_CONCILIADO = "NAO_CONCILIADO"
+    
+
+class StatusProcessamento(str, Enum):
+    PROCESSANDO = "PROCESSANDO"
+    PROCESSADO = "PROCESSADO"
