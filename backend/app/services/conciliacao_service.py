@@ -13,6 +13,21 @@ UPLOAD_DIR = "uploads"
 class ConciliacaoService:
     
     @staticmethod
+    def _sugerir_finalidade(dto) -> int | None:
+        descricao = dto.descricao.lower()
+
+        if "oferta" in descricao:
+            return 1
+
+        if "campanha" in descricao:
+            return 2
+
+        if "inscricao" in descricao:
+            return 3
+
+        return 1 # padrão retorna oferta!
+    
+    @staticmethod
     def _to_lancamento_dict(dto):
         tipo = (
             TipoLancamento.RECEITA
@@ -25,6 +40,8 @@ class ConciliacaoService:
             dto.valor,
             dto.data
         )
+        
+        sugestao_id = ConciliacaoService._sugerir_finalidade(dto)
 
         return {
             "descricao": dto.descricao,
@@ -36,6 +53,7 @@ class ConciliacaoService:
             "hash_transacao": hash_value,
             "observacao": dto.observacao or f"Importado de {dto.banco}",
             "finalidade_id": None,
+            "sugestao_finalidade_id": sugestao_id
         }
 
     @staticmethod

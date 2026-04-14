@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 from app.models.enums import TipoLancamento, FormaPagamento, StatusLancamento
+from app.schemas.finalidade_schema import FinalidadeResponse
 
 
 class LancamentoBase(BaseModel):
@@ -11,6 +12,7 @@ class LancamentoBase(BaseModel):
     forma_pagamento: FormaPagamento
     data_pagamento: datetime
     finalidade_id: Optional[int]
+    sugestao_finalidade: Optional[int] = None
     observacao: Optional[str] = None
 
 
@@ -32,7 +34,10 @@ class LancamentoUpdate(BaseModel):
 class LancamentoResponse(LancamentoBase):
     id: int
     status: StatusLancamento
+    sugestao_finalidade: Optional[FinalidadeResponse] = None
+    
     criado_em: datetime
+    atualizado_em: datetime
 
     class Config:
         from_attributes = True

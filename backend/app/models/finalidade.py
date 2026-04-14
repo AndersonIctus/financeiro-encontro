@@ -16,4 +16,4 @@ class Finalidade(Base):
     atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
 
     # relacionamento
-    lancamentos = relationship("Lancamento", back_populates="finalidade")
+    lancamentos = relationship("Lancamento", foreign_keys="Lancamento.finalidade_id", back_populates="finalidade")

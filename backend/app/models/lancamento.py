@@ -44,6 +44,7 @@ class Lancamento(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     finalidade_id = Column(Integer, ForeignKey("finalidades.id", ondelete="SET NULL"), nullable=True)
+    sugestao_finalidade_id = Column(Integer, ForeignKey("finalidades.id", ondelete="SET NULL"), nullable=True)
 
     descricao = Column(String(255), nullable=False)
     valor = Column(Float, nullable=False)
@@ -57,7 +58,8 @@ class Lancamento(Base):
     atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
 
     # relacionamento
-    finalidade = relationship("Finalidade", back_populates="lancamentos")
+    finalidade = relationship("Finalidade", foreign_keys=[finalidade_id], back_populates="lancamentos")
+    sugestao_finalidade = relationship("Finalidade", foreign_keys=[sugestao_finalidade_id])
 
     __table_args__ = (
         Index("idx_lancamento_data", "data_pagamento"),

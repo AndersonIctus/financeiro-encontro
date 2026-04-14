@@ -73,3 +73,18 @@ class LancamentoService:
     @staticmethod
     def exists_by_hash(db: Session, hash_value: str) -> bool:
         return db.query(Lancamento).filter(Lancamento.hash_transacao == hash_value).first() is not None
+    
+    @staticmethod
+    def conciliar(db, lancamento_id: int, finalidade_id: int):
+        obj = LancamentoRepository.get_by_id(db, lancamento_id)
+
+        if not obj:
+            raise NotFoundException("Lançamento")
+
+        obj.finalidade_id = finalidade_id
+        obj.status = StatusLancamento.CONCILIADO
+
+        db.commit()
+        db.refresh(obj)
+
+        return obj
