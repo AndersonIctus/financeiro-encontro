@@ -97,6 +97,25 @@ O script faz automaticamente:
 
 ---
 
+## Autenticação
+
+Todas as rotas — exceto `/auth/login` e `/health` — exigem um token JWT no header:
+
+```
+Authorization: Bearer <token>
+```
+
+O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (configurável via `JWT_EXPIRE_MINUTES`).
+
+### Autenticação `/auth`
+
+| Método | Rota | Descrição | Pública |
+|---|---|---|---|
+| POST | `/auth/login` | Gera token JWT | Sim |
+| GET | `/auth/me` | Retorna usuário autenticado | Não |
+
+---
+
 ## Endpoints
 
 ### Lançamentos `/lancamentos`
