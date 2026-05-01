@@ -8,6 +8,7 @@ DEFAULT_FINALIDADES = [
     {"id": 2, "nome": "CAMPANHA"},
     {"id": 3, "nome": "INSCRICAO_ENCONTRISTA"},
     {"id": 4, "nome": "INSCRICAO_ENCONTREIRO"},
+    {"id": 99, "nome": "OUTROS"},
 ]
 
 def seed_finalidades(db: Session):
