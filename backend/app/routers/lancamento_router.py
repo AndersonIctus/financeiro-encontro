@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -56,3 +56,12 @@ def update(
 def delete(lancamento_id: int, db: Session = Depends(get_db)):
     LancamentoService.delete(db, lancamento_id)
     return {"message": "Lançamento removido com sucesso"}
+
+
+@router.patch("/conciliar-lancamento/{lancamento_id}", response_model=LancamentoResponse)
+def conciliar_lancamento(
+    lancamento_id: int,
+    idFinalidade: int = Query(..., description="ID da finalidade a ser atribuída"),
+    db: Session = Depends(get_db),
+):
+    return LancamentoService.conciliar(db, lancamento_id, idFinalidade)

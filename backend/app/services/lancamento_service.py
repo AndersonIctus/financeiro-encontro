@@ -4,7 +4,7 @@ from app.repositories.lancamento_repository import LancamentoRepository
 from app.schemas.lancamento_schema import LancamentoCreate, LancamentoUpdate
 from app.models.enums import StatusLancamento
 
-from app.core.exceptions import NotFoundException
+from app.core.exceptions import NotFoundException, BadRequestException
 from app.models.lancamento import Lancamento
 
 
@@ -13,8 +13,8 @@ class LancamentoService:
     @staticmethod
     def create(db: Session, data: LancamentoCreate):
         payload = data.model_dump()
-        
-        # 🔥 proteção contra duplicação
+
+        # proteção contra duplicação
         hash_value = data.get("hash_transacao")
         if "hash" in data:
             existente = db.query(Lancamento).filter(
@@ -22,8 +22,8 @@ class LancamentoService:
             ).first()
 
             if existente:
-                return existente  # ✅ evita duplicação
-        
+                return existente
+
         payload["status"] = StatusLancamento.NAO_CONCILIADO
         return LancamentoRepository.create(db, payload)
 
@@ -72,19 +72,28 @@ class LancamentoService:
 
     @staticmethod
     def exists_by_hash(db: Session, hash_value: str) -> bool:
-        return db.query(Lancamento).filter(Lancamento.hash_transacao == hash_value).first() is not None
-    
+        return (
+            db.query(Lancamento)
+            .filter(Lancamento.hash_transacao == hash_value)
+            .first() is not None
+        )
+
     @staticmethod
-    def conciliar(db, lancamento_id: int, finalidade_id: int):
-        obj = LancamentoRepository.get_by_id(db, lancamento_id)
+    def conciliar(db: Session, lancamento_id: int, finalidade_id: int):
+        from app.services.finalidade_service import FinalidadeService
+        try:
+            obj = LancamentoRepository.get_by_id(db, lancamento_id)
+            if not obj:
+                raise NotFoundException("Lançamento")
 
-        if not obj:
-            raise NotFoundException("Lançamento")
+            FinalidadeService.get_by_id(db, finalidade_id)
 
-        obj.finalidade_id = finalidade_id
-        obj.status = StatusLancamento.CONCILIADO
-
-        db.commit()
-        db.refresh(obj)
-
-        return obj
+            obj.finalidade_id = finalidade_id
+            obj.status = StatusLancamento.CONCILIADO
+            db.commit()
+            db.refresh(obj)
+            return obj
+        except (NotFoundException, BadRequestException):
+            raise
+        except Exception as e:
+            raise BadRequestException(detail=f"Erro ao conciliar lançamento: {str(e)}")

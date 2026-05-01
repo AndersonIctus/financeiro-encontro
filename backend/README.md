@@ -7,78 +7,63 @@ Este serviço fornece uma API REST para controle de:
 - Entradas e saídas financeiras
 - Formas de pagamento (PIX, dinheiro, cartão)
 - Finalidades (oferta, campanha, inscrição)
-- Importação e conciliação de extratos bancários
-- Relatórios financeiros
+- Importação e conciliação de extratos bancários via CSV
 
 ---
 
-# 📌 Objetivo
-
-Este backend foi desenvolvido para garantir:
-
-- organização financeira do evento
-- rastreabilidade das movimentações
-- facilidade na prestação de contas
-- base para relatórios contábeis
-
----
-
-# 🧱 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - Python 3.11
 - FastAPI
 - SQLAlchemy 2.0
-- Pydantic
-- PostgreSQL
+- Pydantic v2
+- PostgreSQL 15
 - Pandas (processamento de CSV)
 - Docker
 
 ---
 
-# 🏗️ Arquitetura
+## Arquitetura
 
 O backend segue uma **arquitetura em camadas**, separando responsabilidades:
 
 ```
 app/
 │
-├── core/          # Configurações e segurança
-├── database/      # Conexão com banco
-├── models/        # Entidades do banco
-├── schemas/       # Validação de dados (Pydantic)
-├── repositories/  # Acesso ao banco (futuro)
+├── core/          # Configurações e exceções customizadas
+├── database/      # Sessão do banco e seeds de dados
+├── models/        # Entidades ORM (SQLAlchemy)
+├── schemas/       # Validação de dados (Pydantic) e DTOs de filtro
+├── repositories/  # Acesso ao banco de dados
 ├── services/      # Regras de negócio
 ├── routers/       # Endpoints HTTP
-├── utils/         # Funções auxiliares
+├── integracao/    # Parser de CSV e engine de conciliação
+├── utils/         # Funções auxiliares (hash, sorting)
 │
 └── main.py        # Inicialização da aplicação
 ```
 
----
-
-# 🔄 Fluxo da Aplicação
+Fluxo de uma requisição:
 
 ```
-Request → Router → Service → Model → Banco
+Request → Router → Service → Repository → Banco
 ```
 
 ---
 
-# 🗄️ Banco de Dados
+## Banco de Dados
 
-Banco utilizado:
+- PostgreSQL 15
+- Schema gerenciado via **Alembic** (migrations versionadas)
+- Seeds de dados executados no startup (finalidades padrão)
 
-- PostgreSQL
-
-⚠️ IMPORTANTE:
-
-O backend **depende do banco rodando via Docker**.
+⚠️ O backend **depende do banco rodando via Docker** antes de ser iniciado.
 
 ---
 
-# 🚀 Como rodar o backend
+## Como rodar
 
-## 1. Subir o banco
+### 1. Subir o banco
 
 Na raiz do projeto:
 
@@ -86,85 +71,152 @@ Na raiz do projeto:
 docker compose -f docker-compose-db.yml up -d
 ```
 
----
-
-## 2. Rodar backend
+### 2. Rodar o backend
 
 ```bash
 cd backend
 ./start-backend.sh
 ```
 
-Esse script faz automaticamente:
+O script faz automaticamente:
 
-- cria o venv (se não existir)
-- ativa o ambiente virtual
-- instala dependências
-- inicia o servidor FastAPI
-
----
-
-# 🌐 Acessos
-
-API:
-
-http://localhost:8000
-
-Swagger:
-
-http://localhost:8000/docs
-
-Health Check:
-
-http://localhost:8000/health
+- Cria o venv (se não existir)
+- Ativa o ambiente virtual
+- Instala dependências
+- Inicia o servidor FastAPI na porta 8000
 
 ---
 
-# 📡 Endpoints principais
+## Acessos
 
-## Lançamentos
-
-- GET /lancamentos → listar lançamentos
-- POST /lancamentos → criar lançamento
-- PUT /lancamentos → atualizar lançamento
-- DELETE /lancamentos → excluir lançamento
-
----
-
-## Extrato bancário
-
-- POST /extrato-bancario → importar CSV
-- GET /extrato-bancario → listar extratos
+| Serviço | URL |
+|---|---|
+| API | http://localhost:8000 |
+| Swagger | http://localhost:8000/docs |
+| Health Check | http://localhost:8000/health |
 
 ---
 
-## Sistema
+## Endpoints
 
-- GET /health → verificar status da API
+### Lançamentos `/lancamentos`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/lancamentos/` | Listar com paginação e filtros |
+| GET | `/lancamentos/all` | Listar todos sem paginação |
+| GET | `/lancamentos/{id}` | Buscar por ID |
+| POST | `/lancamentos/` | Criar lançamento |
+| PUT | `/lancamentos/{id}` | Atualizar lançamento |
+| DELETE | `/lancamentos/{id}` | Excluir lançamento |
+| PATCH | `/lancamentos/conciliar-lancamento/{id}?idFinalidade={id}` | Conciliar manualmente um lançamento |
+
+**Filtros disponíveis no GET `/lancamentos/`:**
+- `data_inicio` / `data_fim` — intervalo de data de pagamento
+- `status` — `CONCILIADO` ou `NAO_CONCILIADO`
+- `tipo` — `RECEITA` ou `DESPESA`
+- `skip` / `limit` — paginação
+- `sort` — ordenação (ex: `data_pagamento:desc`)
 
 ---
 
-# 📥 Conciliação de Extratos
+### Finalidades `/finalidades`
 
-Fluxo:
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/finalidades/` | Listar com paginação |
+| GET | `/finalidades/all` | Listar todas sem paginação |
+| GET | `/finalidades/{id}` | Buscar por ID |
 
-1. Upload de CSV (Banco Inter)
-2. Backend processa arquivo
-3. Cria lançamentos automaticamente
-4. Marca como NÃO CONCILIADO
-5. Usuário ajusta finalidade depois
+> Finalidades são gerenciadas via seeds. Não há endpoints de criação ou edição.
 
 ---
 
-# ⚠️ Problemas comuns
+### Extratos Bancários `/extratos-bancarios`
 
-## Erro: conexão com banco
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/extratos-bancarios/` | Listar com paginação e filtros |
+| GET | `/extratos-bancarios/all` | Listar todos sem paginação |
+| GET | `/extratos-bancarios/{id}` | Buscar por ID |
+| DELETE | `/extratos-bancarios/{id}` | Excluir extrato |
+
+**Filtros disponíveis:**
+- `nome_arquivo` — filtro por nome do arquivo
+- `processado_em_inicio` / `processado_em_fim` — intervalo de data de processamento
+
+---
+
+### Conciliação `/conciliacao`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/conciliacao/upload` | Upload e processamento de CSV bancário |
+
+---
+
+## Fluxo de Conciliação via CSV
+
+1. Upload de CSV (formato Banco Inter) via `POST /conciliacao/upload`
+2. Backend valida e processa o arquivo
+3. Cria lançamentos automaticamente como `NAO_CONCILIADO`
+4. Aplica sugestão automática de finalidade por palavras-chave
+5. Retorna relatório com totais de inseridos, duplicados e erros
+6. Usuário concilia manualmente via `PATCH /lancamentos/conciliar-lancamento/{id}`
+
+### Deduplicação
+
+Cada lançamento gera um hash MD5 a partir de `data_pagamento + valor + descricao`. Reenviar o mesmo CSV não duplica registros.
+
+---
+
+## Migrations (Alembic)
+
+Os comandos abaixo devem ser executados dentro da pasta `backend/` com o venv ativo.
+
+### Aplicar todas as migrations pendentes
+
+```bash
+alembic upgrade head
+```
+
+### Gerar nova migration a partir das mudanças nos models
+
+```bash
+alembic revision --autogenerate -m "descricao da mudanca"
+```
+
+> Sempre revise o arquivo gerado em `alembic/versions/` antes de aplicar — o autogenerate não detecta tudo (ex: renomeações de coluna).
+
+### Reverter a última migration
+
+```bash
+alembic downgrade -1
+```
+
+### Ver histórico de migrations
+
+```bash
+alembic history
+```
+
+### Ver qual migration está aplicada no banco
+
+```bash
+alembic current
+```
+
+---
+
+## Problemas comuns
+
+**Erro de conexão com o banco:**
 
 ```
 could not connect to server
 ```
 
-✔ Solução:
+Solução: subir o banco antes do backend.
 
 ```bash
 docker compose -f docker-compose-db.yml up -d
@@ -172,49 +224,8 @@ docker compose -f docker-compose-db.yml up -d
 
 ---
 
-## Erro: tabela não existe
+## Próximos passos
 
-```
-relation "lancamentos" does not exist
-```
-
-✔ Isso será resolvido na próxima etapa com migrations (Alembic)
-
----
-
-# 🔐 Segurança (próximos passos)
-
-Planejado:
-
-- autenticação JWT
-- controle de acesso
-- proteção de endpoints
-
----
-
-# 📈 Evoluções futuras
-
-- Alembic (migrations)
-- autenticação JWT
-- paginação
-- filtros avançados
-- dashboard financeiro
-- geração de relatórios
-- logs estruturados
-- tratamento global de erros
-
----
-
-# 📌 Observações
-
-Este backend foi projetado para ser:
-
-- simples de usar durante o evento
-- robusto para evitar erros financeiros
-- escalável para futuras melhorias
-
----
-
-# 📄 Licença
-
-Projeto interno para uso no gerenciamento financeiro do encontro da igreja.
+- Autenticação JWT
+- Endpoints de dashboard e relatórios financeiros
+- Suporte a outros bancos (Itaú, Bradesco, Santander)
