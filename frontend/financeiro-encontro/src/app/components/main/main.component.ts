@@ -1,0 +1,91 @@
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { MaterialGlobalModule } from '../../shared/modules/material.imports.module';
+import { AuthService } from '../../services/auth.service';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { Usuario } from '../../models/usuario.model';
+
+interface NavItem {
+  label: string;
+  icon: string;
+  route: string;
+}
+
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+@Component({
+  selector: 'app-main',
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MaterialGlobalModule],
+  templateUrl: './main.component.html',
+  styleUrl: './main.component.scss',
+})
+export class MainComponent implements OnInit{
+  private authService = inject(AuthService);
+  private router      = inject(Router);
+  private dialog      = inject(MatDialog);
+
+  collapsed = signal(false);
+
+  usuario: Usuario | null = null;
+
+  navSections: NavSection[] = [
+    {
+      title: 'Painel',
+      items: [
+        { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+      ],
+    },
+    {
+      title: 'Financeiro',
+      items: [
+        { label: 'Lançamentos', icon: 'receipt_long',  route: '/lancamentos' },
+        { label: 'Conciliação',  icon: 'sync_alt',      route: '/conciliacao' },
+      ],
+    },
+    {
+      title: 'Arquivos',
+      items: [
+        { label: 'Arquivos Enviados', icon: 'folder_open', route: '/arquivos' },
+      ],
+    },
+  ];
+
+  get nomeExibido(): string {
+    const nome = this.usuario?.nome ?? '';
+    return nome.length > 15 ? nome.slice(0, 15) + '…' : nome;
+  }
+
+  ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    }
+
+    this.usuario = this.authService.getUsuario();
+  }
+
+  toggleMenu(): void {
+    this.collapsed.update(v => !v);
+  }
+
+  logout(): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '360px',
+      data: {
+        title:        'Sair do sistema',
+        message:      'Deseja realmente sair?',
+        confirmLabel: 'Sair',
+        cancelLabel:  'Cancelar',
+      },
+    }).afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+}
