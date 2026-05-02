@@ -116,6 +116,7 @@ cp .env.example .env
 | `JWT_ALGORITHM` | Algoritmo de assinatura JWT | `HS256` | Não |
 | `JWT_EXPIRE_MINUTES` | Expiração do token em minutos | `480` (8 horas) | Não |
 | `SQL_ECHO` | Exibe queries SQL no console | `false` | Não |
+| `CORS_ORIGINS` | Origens permitidas (separadas por vírgula) | `http://localhost:4200` | Não |
 
 > ⚠️ O arquivo `.env` está no `.gitignore` e **nunca deve ser commitado**. Apenas `.env.example` é versionado.
 

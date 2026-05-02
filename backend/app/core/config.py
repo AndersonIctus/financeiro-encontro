@@ -13,3 +13,5 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "480"))
 
 SQL_ECHO = os.getenv("SQL_ECHO", "false").lower() == "true"
+
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:4200").split(",")

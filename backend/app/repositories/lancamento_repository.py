@@ -54,7 +54,10 @@ class LancamentoRepository:
 
         if params.tipo:
             query = query.filter(Lancamento.tipo == params.tipo)
-        
+
+        if params.finalidade_id:
+            query = query.filter(Lancamento.finalidade_id == params.finalidade_id)
+
         if params.limit > 1000 or params.limit <= 0:
             params.limit = 1000
 
@@ -78,6 +81,8 @@ class LancamentoRepository:
         if params.tipo:
             query = query.filter(Lancamento.tipo == params.tipo)
 
+        if params.finalidade_id:
+            query = query.filter(Lancamento.finalidade_id == params.finalidade_id)
 
         query = apply_sort(query, Lancamento, params.sort, SORT_FIELDS, DEFAULT_SORT)
 

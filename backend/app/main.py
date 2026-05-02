@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import CORS_ORIGINS
 from app.core.deps import get_current_user
 
 from app.database.seeds.main_seeds import run_seed
@@ -30,6 +32,14 @@ app = FastAPI(
     description="Sistema financeiro para gerenciamento do encontro",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # rotas públicas
