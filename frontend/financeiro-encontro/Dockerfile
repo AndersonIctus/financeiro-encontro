@@ -1,12 +1,20 @@
-FROM node:20 as build
+FROM node:20-slim AS build
+
+ARG API_URL=http://localhost:8000
 
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm ci
+
 COPY . .
 
-RUN npm install
-RUN npm run build --prod
+RUN sed -i "s|##API_URL##|${API_URL}|g" src/environments/environment.prod.ts
+
+RUN npm run build
+
+# ---
 
 FROM nginx:alpine
 
-COPY --from=build /app/dist/financeiro-encontro /usr/share/nginx/html
+COPY --from=build /app/dist/financeiro-encontro/browser /usr/share/nginx/html

@@ -1,59 +1,99 @@
-# FinanceiroEncontro
+# Financeiro Encontro — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Frontend do sistema **Financeiro Encontro**, interface web para gerenciamento financeiro de eventos da igreja.
 
-## Development server
+---
 
-To start a local development server, run:
+## Tecnologias
 
-```bash
-ng serve
-```
+- Angular 21 (standalone components)
+- TypeScript 5.9 (strict mode)
+- SCSS
+- Moment.js
+- Vitest
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Pré-requisitos
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+O backend deve estar rodando antes de iniciar o frontend.
+Veja as instruções em [backend/README.md](../../backend/README.md).
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Como rodar
 
 ```bash
-ng build
+npm install
+npm start        # ng serve em http://localhost:4200
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## Comandos disponíveis
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+| Comando | Descrição |
+|---|---|
+| `npm start` | Servidor de desenvolvimento em `:4200` |
+| `npm run build` | Build de produção em `dist/` |
+| `npm test` | Testes unitários com Vitest |
+
+---
+
+## Estrutura do projeto
+
+```
+src/
+├── environments/
+│   ├── environment.ts          # API_URL desenvolvimento
+│   └── environment.prod.ts     # API_URL produção
+├── app/
+│   ├── models/                 # Interfaces TypeScript (espelham o backend)
+│   ├── services/               # Serviços HTTP (extendem AbstractService)
+│   │   └── util/               # Utilitários (PageTemplate)
+│   ├── general/
+│   │   └── auth/               # Auth interceptor e guard JWT
+│   └── components/             # Componentes por tela (lazy loaded)
+│       ├── login/
+│       └── dashboard/
+└── styles.scss                 # Estilos globais
+```
+
+---
+
+## Autenticação
+
+O login é feito via `POST /auth/login`. O token JWT retornado é salvo no `localStorage` e injetado automaticamente em todas as requisições pelo `authInterceptor`. Rotas protegidas usam o `authGuard`.
+
+---
+
+## Variáveis de ambiente
+
+### Desenvolvimento local
+
+O Angular usa `src/environments/environment.ts` automaticamente com `npm start`. Edite o arquivo para apontar para o backend correto:
+
+```typescript
+export const environment = {
+  production: false,
+  API_URL: 'http://localhost:8000'
+};
+```
+
+### Produção (build)
+
+O `ng build` troca automaticamente `environment.ts` por `environment.prod.ts` (configurado via `fileReplacements` no `angular.json`).
+
+Os valores de `environment` são **compilados dentro do bundle** em tempo de build — não é possível alterá-los depois sem recompilar.
+
+### Deploy em nuvem (Docker)
+
+Passe a URL do backend como build arg:
 
 ```bash
-ng test
+docker build --build-arg API_URL=https://api.seudominio.com -t financeiro-frontend .
 ```
 
-## Running end-to-end tests
+Se omitido, o valor padrão é `http://localhost:8000`.
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+> O Dockerfile substitui o placeholder `##API_URL##` em `environment.prod.ts` antes de compilar o Angular.

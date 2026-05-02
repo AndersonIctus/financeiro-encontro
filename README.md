@@ -1,148 +1,77 @@
-Financeiro Encontro
+# Financeiro Encontro
 
-Sistema web para gerenciamento financeiro de um encontro da igreja,
-permitindo o controle de entradas e saídas financeiras durante reuniões
-de preparação e durante o evento final.
+Sistema web para gerenciamento financeiro de encontros da igreja, permitindo controle de entradas e saídas, conciliação de extratos bancários via CSV e geração de relatórios financeiros.
 
-O objetivo do sistema é ajudar a equipe financeira a registrar
-pagamentos, acompanhar receitas e despesas, conciliar pagamentos via PIX
-e gerar relatórios financeiros.
+---
 
-------------------------------------------------------------------------
+## Funcionalidades
 
-FUNCIONALIDADES DO SISTEMA
+- Registro de receitas e despesas (PIX, dinheiro, cartão)
+- Organização por finalidades (ofertas, campanhas, inscrições)
+- Importação e conciliação de extratos bancários (Banco Inter)
+- Dashboard financeiro com totais, por dia e por mês
+- Autenticação via JWT
 
-O sistema permitirá gerenciar:
+---
 
--   Ofertas
--   Campanhas
--   Inscrições de participantes
--   Inscrições de trabalhadores
--   Receitas
--   Despesas
--   Pagamentos via PIX
--   Pagamentos em dinheiro
--   Pagamentos em cartão
+## Stack
 
-Também será possível realizar:
+| Camada | Tecnologia |
+|---|---|
+| Backend | Python 3.11 + FastAPI + SQLAlchemy 2.0 |
+| Banco | PostgreSQL 15 |
+| Infra | Docker + Docker Compose + Nginx |
 
--   Conciliação de extratos bancários
--   Relatórios financeiros
--   Dashboard de acompanhamento financeiro
+---
 
-------------------------------------------------------------------------
+## Como subir o projeto
 
-TECNOLOGIAS UTILIZADAS
+### Opção 1 — Stack completa com Docker
 
-Backend - Python 3.11 - FastAPI - SQLAlchemy - PostgreSQL - Pandas
+```bash
+cp .env.example .env   # preencha os valores
+docker compose up --build
+```
 
-Infraestrutura - Docker - Docker Compose
+Acesse em `http://localhost`.
 
-------------------------------------------------------------------------
+### Opção 2 — Desenvolvimento local
 
-ARQUITETURA DO BACKEND
+**1. Subir o banco:**
 
-O backend segue uma arquitetura em camadas para manter o código
-organizado e escalável.
-
-Estrutura principal:
-
-backend/ app/ core/ -> configurações do sistema database/ -> conexão com
-banco de dados models/ -> entidades do banco schemas/ -> validação de
-dados routers/ -> endpoints HTTP services/ -> regras de negócio utils/
--> utilidades
-
-main.py -> inicialização da aplicação FastAPI
-
-------------------------------------------------------------------------
-
-BANCO DE DADOS
-
-O sistema depende de um banco PostgreSQL rodando em um container Docker.
-
-Antes de iniciar o backend localmente é necessário subir o banco.
-
-Comando:
-
+```bash
 docker compose -f docker-compose-db.yml up -d
+```
 
-Para verificar se o container está rodando:
+**2. Subir o backend:**
 
-docker ps
-
-------------------------------------------------------------------------
-
-RODANDO O BACKEND LOCALMENTE
-
-Entrar na pasta do backend:
-
+```bash
 cd backend
+cp .env.example .env   # preencha os valores (primeira vez)
+./start-backend.sh
+```
 
-Criar ambiente virtual:
+O script cria o venv, instala dependências, aplica as migrations e sobe o servidor na porta definida em `APP_PORT` (padrão: `8000`).
 
-python -m venv venv
+---
 
-Ativar ambiente virtual
+## Acessos (desenvolvimento local)
 
-Linux ou Mac:
+| Serviço | URL |
+|---|---|
+| API | `http://localhost:8000` |
+| Swagger | `http://localhost:8000/docs` |
+| Health Check | `http://localhost:8000/health` |
+| pgAdmin | `http://localhost:9090` |
 
-source venv/bin/activate
+---
 
-Windows:
+## Documentação detalhada
 
-venv
+- [backend/README.md](backend/README.md) — endpoints, autenticação, variáveis de ambiente, migrations e fluxo de conciliação
 
-Instalar dependências:
+---
 
-pip install -r requirements.txt
+## Licença
 
-Executar o servidor:
-
-uvicorn app.main:app –reload
-
-------------------------------------------------------------------------
-
-ACESSANDO A API
-
-Swagger (documentação automática):
-
-http://localhost:8000/docs
-
-Health check:
-
-http://localhost:8000/health
-
-------------------------------------------------------------------------
-
-IMPORTANTE
-
-O backend depende do PostgreSQL rodando em Docker.
-
-Caso o banco não esteja ativo ocorrerá erro de conexão.
-
-Para subir o banco:
-
-docker compose -f docker-compose-db.yml up -d
-
-------------------------------------------------------------------------
-
-PRÓXIMOS PASSOS DO PROJETO
-
-Evoluções planejadas:
-
--   Migrations com Alembic
--   Autenticação JWT
--   Paginação de endpoints
--   Filtros de lançamentos
--   Upload de extratos bancários
--   Conciliação automática de pagamentos
--   Geração de relatórios financeiros
--   Logs estruturados
--   Tratamento global de exceções
-
-------------------------------------------------------------------------
-
-LICENÇA
-
-Projeto interno utilizado para gerenciamento financeiro do encontro da
-igreja.
+Projeto interno utilizado para gerenciamento financeiro do encontro da igreja.
