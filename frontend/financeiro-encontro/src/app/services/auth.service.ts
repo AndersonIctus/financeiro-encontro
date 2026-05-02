@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 
 import { AbstractService } from './abstract.service';
 import { Usuario } from '../models/usuario.model';
@@ -23,7 +23,13 @@ export class AuthService extends AbstractService<Usuario> {
 
   login(request: LoginRequest): Observable<TokenResponse> {
     return this.persist<TokenResponse>(request, '/login').pipe(
-      tap(response => this.saveToken(response.access_token))
+      tap(response => this.saveToken(response.access_token)),
+      switchMap(response =>
+        this.me().pipe(
+          tap(usuario => this.saveUsuario(usuario)),
+          map(() => response)
+        )
+      )
     );
   }
 

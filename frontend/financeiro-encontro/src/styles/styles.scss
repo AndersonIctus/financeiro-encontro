@@ -21,3 +21,8 @@
 @use 'components/side-menu';
 @use 'components/btn';
 @use 'components/spinner';
+
+
+.mat-mdc-dialog-surface, .mdc-dialog__surface {
+    border-radius: 8px !important;
+}
