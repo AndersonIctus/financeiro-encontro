@@ -1,0 +1,42 @@
+.btn {
+  // ─── Largura ──────────────────────────────────────────────────────────────
+  &--full { width: 100%; }
+
+  // ─── Tamanhos ─────────────────────────────────────────────────────────────
+  &--sm {
+    height: 32px;
+    font-size: 0.75rem !important;
+  }
+
+  &--md { height: 40px; }
+
+  &--lg {
+    height: 48px;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+  }
+
+  // ─── Conteúdo interno (spinner + ícone + texto) ───────────────────────────
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    pointer-events: none;
+  }
+
+  // ─── Spinner dentro do botão: herda a cor do texto do botão ───────────────
+  &__spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --mdc-circular-progress-active-indicator-color: currentColor;
+  }
+
+  // ─── Botão com ícone à esquerda ───────────────────────────────────────────
+  &--icon-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+}

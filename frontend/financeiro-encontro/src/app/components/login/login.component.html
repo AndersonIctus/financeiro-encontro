@@ -1,6 +1,7 @@
 <div class="login-page">
   <mat-card class="login-card">
     <div class="login-inner">
+
       <div class="login-header">
         <div class="login-logo">F</div>
         <h1>Financeiro Encontro</h1>
@@ -18,27 +19,39 @@
 
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Senha</mat-label>
-          <input matInput type="password" formControlName="senha" autocomplete="current-password" />
+          <input matInput
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="senha"
+            autocomplete="current-password" />
+          <button mat-icon-button matSuffix type="button"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+            <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
           @if (senha?.invalid && senha?.touched) {
             <mat-error>Senha é obrigatória</mat-error>
           }
         </mat-form-field>
 
         @if (errorMessage) {
-          <div class="error-banner">{{ errorMessage }}</div>
+          <div class="validation__banner validation__banner--error">
+            {{ errorMessage }}
+          </div>
         }
 
         <button
           mat-flat-button
           type="submit"
-          class="w-full submit-btn"
+          class="btn--full btn--lg"
           [disabled]="loading || form.invalid">
           @if (loading) {
-            <mat-progress-spinner diameter="20" mode="indeterminate" />
+            <mat-progress-spinner class="btn__spinner" diameter="20" mode="indeterminate" />
+          } @else {
+            Entrar
           }
-          {{ loading ? 'Entrando...' : 'Entrar' }}
         </button>
       </form>
+
     </div>
   </mat-card>
 </div>

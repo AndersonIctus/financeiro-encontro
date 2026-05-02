@@ -1,0 +1,23 @@
+// ─── Themes (deve vir primeiro — contém @use internamente) ───────────────────
+@use 'themes/custom-theme';
+
+// ─── Abstracts (definições puras — sem output CSS) ────────────────────────────
+@use 'abstracts/variables';
+@use 'abstracts/functions';
+@use 'abstracts/mixins';
+@use 'abstracts/placeholders';
+
+// ─── Base ─────────────────────────────────────────────────────────────────────
+@use 'base/reset';
+@use 'base/main';
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+@use 'layout/text';
+@use 'layout/validation';
+
+// ─── Components ───────────────────────────────────────────────────────────────
+@use 'components/div';
+@use 'components/divisor';
+@use 'components/side-menu';
+@use 'components/btn';
+@use 'components/spinner';
