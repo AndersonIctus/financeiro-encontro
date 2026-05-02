@@ -1,14 +1,12 @@
 import os
 from sqlalchemy.orm import Session
 
+from app.core.config import UPLOAD_FOLDER
 from app.integracao.conciliacao.conciliador import Conciliador
 from app.services.extrato_bancario_service import ExtratoBancarioService
 from app.services.lancamento_service import LancamentoService
 from app.models.enums import FormaPagamento, StatusLancamento, StatusProcessamento, TipoLancamento
 from app.utils.hash_utils import gerar_hash
-
-
-UPLOAD_DIR = "uploads"
 
 class ConciliacaoService:
     
@@ -61,8 +59,8 @@ class ConciliacaoService:
         if not file.filename.endswith(".csv"):
             raise Exception("Arquivo deve ser CSV")
 
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
 
         with open(file_path, "wb") as buffer:
             buffer.write(file.file.read())

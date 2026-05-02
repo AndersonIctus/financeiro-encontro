@@ -1,14 +1,13 @@
 version: "3.9"
 
 services:
-
   postgres:
     image: postgres:15
     container_name: financeiro_encontro_postgres
     environment:
-      POSTGRES_DB: financeiro_encontro
-      POSTGRES_USER: financeiro
-      POSTGRES_PASSWORD: financeiro
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -20,8 +19,8 @@ services:
     ports:
       - "9090:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
 
 volumes:
   postgres_data:

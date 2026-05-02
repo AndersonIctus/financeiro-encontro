@@ -83,7 +83,46 @@ O script faz automaticamente:
 - Cria o venv (se não existir)
 - Ativa o ambiente virtual
 - Instala dependências
-- Inicia o servidor FastAPI na porta 8000
+- Carrega o `.env` se existir na pasta `backend/`
+- Inicia o servidor FastAPI na porta definida por `APP_PORT` (padrão: 8000)
+
+---
+
+## Variáveis de Ambiente
+
+O projeto usa dois arquivos `.env.example` conforme o contexto:
+
+| Arquivo | Quando usar |
+|---|---|
+| `backend/.env.example` | Desenvolvimento local (`./start-backend.sh`) |
+| `.env.example` (raiz) | Stack completa com Docker Compose |
+
+### Configurando para desenvolvimento local
+
+```bash
+cd backend
+cp .env.example .env
+# edite .env com os valores reais
+```
+
+### Variáveis disponíveis
+
+| Variável | Descrição | Padrão | Obrigatória |
+|---|---|---|---|
+| `DATABASE_URL` | URL de conexão com o banco | `postgresql://...@localhost:5432/financeiro_encontro` | Sim |
+| `UPLOAD_FOLDER` | Pasta onde os CSVs são salvos | `./uploads` | Não |
+| `APP_PORT` | Porta em que o servidor sobe | `8000` | Não |
+| `JWT_SECRET` | Chave secreta para assinar os tokens | `changeme-insecure-secret` | **Sim em produção** |
+| `JWT_ALGORITHM` | Algoritmo de assinatura JWT | `HS256` | Não |
+| `JWT_EXPIRE_MINUTES` | Expiração do token em minutos | `480` (8 horas) | Não |
+| `SQL_ECHO` | Exibe queries SQL no console | `false` | Não |
+
+> ⚠️ O arquivo `.env` está no `.gitignore` e **nunca deve ser commitado**. Apenas `.env.example` é versionado.
+
+> ⚠️ Em produção, sempre defina um `JWT_SECRET` forte. Para gerar:
+> ```bash
+> python -c "import secrets; print(secrets.token_hex(32))"
+> ```
 
 ---
 
@@ -91,9 +130,9 @@ O script faz automaticamente:
 
 | Serviço | URL |
 |---|---|
-| API | http://localhost:8000 |
-| Swagger | http://localhost:8000/docs |
-| Health Check | http://localhost:8000/health |
+| API | `http://localhost:{APP_PORT}` |
+| Swagger | `http://localhost:{APP_PORT}/docs` |
+| Health Check | `http://localhost:{APP_PORT}/health` |
 
 ---
 
@@ -245,6 +284,5 @@ docker compose -f docker-compose-db.yml up -d
 
 ## Próximos passos
 
-- Autenticação JWT
-- Endpoints de dashboard e relatórios financeiros
-- Suporte a outros bancos (Itaú, Bradesco, Santander)
+- Suporte a outros bancos no parser de CSV (Itaú, Bradesco, Santander)
+- Deploy em nuvem (banco de dados + backend + frontend)
