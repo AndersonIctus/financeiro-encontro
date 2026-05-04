@@ -1,0 +1,133 @@
+@use '../../../styles/abstracts/variables' as v;
+
+.dashboard {
+  padding: v.$spacing-lg;
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0 0 v.$spacing-lg;
+    color: var(--mat-sys-on-surface);
+  }
+
+  // ─── Filtros ───────────────────────────────────────────────────────────────
+
+  &__filters {
+    margin-bottom: v.$spacing-lg;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: flex-start;
+    gap: v.$spacing-md;
+    flex-wrap: wrap;
+
+    mat-form-field {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .filter-btn {
+      height: 56px;
+      padding: 0 v.$spacing-lg;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+  }
+
+  // ─── Loading ───────────────────────────────────────────────────────────────
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: v.$spacing-2xl 0;
+  }
+
+  // ─── Cards ────────────────────────────────────────────────────────────────
+
+  &__cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: v.$spacing-md;
+
+    @media (max-width: v.$bp-lg) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: v.$bp-sm) { grid-template-columns: 1fr; }
+  }
+
+  &__card {
+    .card-content {
+      display: flex;
+      align-items: center;
+      gap: v.$spacing-md;
+      padding: v.$spacing-xs 0;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: v.$radius-md;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--mat-sys-on-surface-variant);
+      margin-bottom: 2px;
+    }
+
+    .card-value {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--mat-sys-on-surface);
+      white-space: nowrap;
+
+      &--count {
+        font-size: 1.75rem;
+      }
+
+      &--negative {
+        color: var(--mat-sys-error);
+      }
+    }
+
+    // ─── variantes de cor ──────────────────────────────────────────────────
+
+    &--receita .card-icon {
+      background: color-mix(in srgb, var(--mat-sys-tertiary) 15%, transparent);
+      color: var(--mat-sys-tertiary);
+    }
+
+    &--despesa .card-icon {
+      background: color-mix(in srgb, var(--mat-sys-error) 15%, transparent);
+      color: var(--mat-sys-error);
+    }
+
+    &--saldo .card-icon {
+      background: color-mix(in srgb, var(--mat-sys-primary) 15%, transparent);
+      color: var(--mat-sys-primary);
+    }
+
+    &--quantidade .card-icon {
+      background: color-mix(in srgb, var(--mat-sys-secondary) 15%, transparent);
+      color: var(--mat-sys-secondary);
+    }
+  }
+}

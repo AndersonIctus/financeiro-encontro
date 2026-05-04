@@ -1,0 +1,130 @@
+<div class="dashboard">
+
+  <h1 class="dashboard__title">Dashboard</h1>
+
+  <!-- ─── Filtros ──────────────────────────────────────────────────────────── -->
+  <mat-card class="dashboard__filters" appearance="outlined">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="buscar()" class="filter-row">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Data início</mat-label>
+          <input matInput [matDatepicker]="pickerInicio" formControlName="data_inicio" placeholder="DD/MM/AAAA">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerInicio" />
+          <mat-datepicker #pickerInicio />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Data fim</mat-label>
+          <input matInput [matDatepicker]="pickerFim" formControlName="data_fim" placeholder="DD/MM/AAAA">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFim" />
+          <mat-datepicker #pickerFim />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="tipo">
+            @for (op of tipoOpcoes; track op.value) {
+              <mat-option [value]="op.value">{{ op.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (op of statusOpcoes; track op.value) {
+              <mat-option [value]="op.value">{{ op.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="filter-btn">
+          <mat-icon>search</mat-icon>
+          Buscar
+        </button>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ─── Cards de totais ──────────────────────────────────────────────────── -->
+  @if (loading) {
+    <div class="dashboard__loading">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else {
+    <div class="dashboard__cards">
+
+      <!-- Receitas -->
+      <mat-card class="dashboard__card dashboard__card--receita" appearance="outlined">
+        <mat-card-content>
+          <div class="card-content">
+            <div class="card-icon">
+              <mat-icon>trending_up</mat-icon>
+            </div>
+            <div class="card-info">
+              <span class="card-label">Receitas</span>
+              <span class="card-value">
+                {{ (totais?.total_receitas ?? 0) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Despesas -->
+      <mat-card class="dashboard__card dashboard__card--despesa" appearance="outlined">
+        <mat-card-content>
+          <div class="card-content">
+            <div class="card-icon">
+              <mat-icon>trending_down</mat-icon>
+            </div>
+            <div class="card-info">
+              <span class="card-label">Despesas</span>
+              <span class="card-value">
+                {{ (totais?.total_despesas ?? 0) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Saldo -->
+      <mat-card class="dashboard__card dashboard__card--saldo" appearance="outlined">
+        <mat-card-content>
+          <div class="card-content">
+            <div class="card-icon">
+              <mat-icon>account_balance_wallet</mat-icon>
+            </div>
+            <div class="card-info">
+              <span class="card-label">Saldo</span>
+              <span class="card-value" [class.card-value--negative]="(totais?.saldo ?? 0) < 0">
+                {{ (totais?.saldo ?? 0) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Quantidade -->
+      <mat-card class="dashboard__card dashboard__card--quantidade" appearance="outlined">
+        <mat-card-content>
+          <div class="card-content">
+            <div class="card-icon">
+              <mat-icon>receipt_long</mat-icon>
+            </div>
+            <div class="card-info">
+              <span class="card-label">Lançamentos</span>
+              <span class="card-value card-value--count">
+                {{ totais?.quantidade ?? 0 }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  }
+
+</div>
