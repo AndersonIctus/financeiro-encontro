@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
@@ -22,14 +22,12 @@ export abstract class AbstractService<M = any> {
         return this._actionUrl;
     }
 
-    abstract getDefaultFilterParam(param: string): string;
-
     persist<T = M>(model: any, action: string = '', options?: any): Observable<T> {
       return this._http
                 .post<T>(`${this._url}/${this._actionUrl}${action}`, model, this.getOptions(options));
     }
 
-    update<T = any>(model: any, id: number, action: string = '', options?: any): Observable<T> {
+    update<T = any>(model: any, id?: number, action: string = '', options?: any): Observable<T> {
       let _url = `${this._url}/${this._actionUrl}`;
       if (id !== null) {
         _url += `/${id}`;
@@ -38,6 +36,17 @@ export abstract class AbstractService<M = any> {
 
       return this._http
               .put<T>(_url, model, this.getOptions(options));
+    }
+
+    patch<T = any>(model: any, id?: number, action: string = '', options?: any): Observable<T> {
+      let _url = `${this._url}/${this._actionUrl}`;
+      if (id !== null) {
+        _url += `/${id}`;
+      }
+      _url += `${action}`;
+
+      return this._http
+              .patch<T>(_url, model, this.getOptions(options));
     }
 
     delete(id: number, action: string = '', options?: any) {
@@ -52,18 +61,9 @@ export abstract class AbstractService<M = any> {
                 .pipe(map(() => null));
     }
 
-    getCustom<T = any>(parameters: string, options?: any): Observable<T> {
+    getCustom<T = any>(action: string = '', options?: any): Observable<T> {
         return this._http
-                  .get<T>(`${this._url}/${this._actionUrl}${parameters}`, this.getOptions(options));
-    }
-
-    getAllWithParameter<T = any>(parameters: string, options?: any): Promise<T> {
-        return this.getCustom<T>(parameters, this.getOptions(options))
-                  .toPromise() as Promise<T>;
-    }
-
-    getAll<T = any>(options?: any): Promise<T> {
-        return this.getAllWithParameter<T>('', this.getOptions(options));
+                  .get<T>(`${this._url}/${this._actionUrl}${action}`, this.getOptions(options));
     }
 
     getById(id: number, options?: any) {
@@ -71,7 +71,7 @@ export abstract class AbstractService<M = any> {
                 .get<M>(`${this._url}/${this._actionUrl}/${id}`, this.getOptions(options));
     }
 
-    getByCodigo(codigo: string, options?: any) {
+    getByCode(codigo: string, options?: any) {
       return this._http
                 .get<M>(`${this._url}/${this._actionUrl}/${codigo}`, this.getOptions(options));
     }

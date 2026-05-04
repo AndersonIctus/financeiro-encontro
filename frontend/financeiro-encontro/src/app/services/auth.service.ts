@@ -17,10 +17,6 @@ export class AuthService extends AbstractService<Usuario> {
     super(http, 'auth');
   }
 
-  getDefaultFilterParam(param: string): string {
-    return param;
-  }
-
   login(request: LoginRequest): Observable<TokenResponse> {
     return this.persist<TokenResponse>(request, '/login').pipe(
       tap(response => this.saveToken(response.access_token)),

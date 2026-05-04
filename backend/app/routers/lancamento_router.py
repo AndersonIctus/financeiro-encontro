@@ -58,10 +58,13 @@ def delete(lancamento_id: int, db: Session = Depends(get_db)):
     return {"message": "Lançamento removido com sucesso"}
 
 
-@router.patch("/conciliar-lancamento/{lancamento_id}", response_model=LancamentoResponse)
+@router.patch(
+    "/conciliar/{lancamento_id}/finalidade/{finalidade_id}", 
+    response_model=LancamentoResponse
+)
 def conciliar_lancamento(
     lancamento_id: int,
-    idFinalidade: int = Query(..., description="ID da finalidade a ser atribuída"),
+    finalidade_id: int,
     db: Session = Depends(get_db),
 ):
-    return LancamentoService.conciliar(db, lancamento_id, idFinalidade)
+    return LancamentoService.conciliar(db, lancamento_id, finalidade_id)
