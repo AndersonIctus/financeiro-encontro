@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import moment from 'moment';
 
@@ -20,7 +20,6 @@ import { StatusLancamento } from '../../models/constants/status-lancamento';
   imports: [
     CommonModule,
     CurrencyPipe,
-    DecimalPipe,
     MaterialGlobalModule,
     MaterialFormsModule,
     MaterialDatepickerModule,
