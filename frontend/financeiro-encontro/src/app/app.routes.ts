@@ -16,7 +16,22 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
+      {
+        path: 'lancamentos',
+        loadComponent: () => import('./components/lancamentos/lancamentos.component').then(m => m.LancamentosComponent),
+      },
+      {
+        path: 'conciliacao',
+        loadComponent: () => import('./components/conciliacao/conciliacao.component').then(m => m.ConciliacaoComponent),
+      },
+      {
+        path: 'arquivos',
+        loadComponent: () => import('./components/arquivos/arquivos.component').then(m => m.ArquivosComponent),
+      },
     ],
   },
-  { path: '**', redirectTo: 'login' },
+  {
+    path: '**',
+    loadComponent: () => import('./components/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
 ];
