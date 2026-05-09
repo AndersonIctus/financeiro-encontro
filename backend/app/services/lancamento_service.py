@@ -3,26 +3,27 @@ from sqlalchemy.orm import Session
 from app.repositories.lancamento_repository import LancamentoRepository
 from app.schemas.lancamento_schema import LancamentoCreate, LancamentoUpdate
 from app.models.enums import StatusLancamento
-
 from app.core.exceptions import NotFoundException, BadRequestException
 from app.models.lancamento import Lancamento
+from app.utils.hash_utils import gerar_hash
 
 
 class LancamentoService:
 
     @staticmethod
-    def create(db: Session, data: LancamentoCreate):
-        payload = data.model_dump()
+    def create(db: Session, data: LancamentoCreate | dict):
+        payload = data.model_dump() if hasattr(data, "model_dump") else dict(data)
 
-        # proteção contra duplicação
-        hash_value = data.get("hash_transacao")
-        if "hash" in data:
-            existente = db.query(Lancamento).filter(
-                Lancamento.hash_transacao == hash_value
-            ).first()
+        if not payload.get("hash_transacao"):
+            payload["hash_transacao"] = gerar_hash(
+                payload["descricao"],
+                payload["valor"],
+                payload["data_pagamento"],
+                payload.get("observacao") or "",
+            )
 
-            if existente:
-                return existente
+        if LancamentoService.exists_by_hash(db, payload["hash_transacao"]):
+            raise BadRequestException("Lançamento já existe")
 
         payload["status"] = StatusLancamento.NAO_CONCILIADO
         return LancamentoRepository.create(db, payload)

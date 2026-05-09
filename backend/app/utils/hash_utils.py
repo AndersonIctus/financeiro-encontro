@@ -14,13 +14,14 @@ def _normalizar_texto(texto: str) -> str:
     return texto
 
 
-def gerar_hash(descricao: str, valor: float, data: datetime) -> str:
+def gerar_hash(descricao: str, valor: float, data: datetime, observacao: str) -> str:
     """
     Gera hash determinístico para identificar transações únicas.
+    Campos: descricao + valor + data_pagamento + observacao.
     """
+    descricao_norm  = _normalizar_texto(descricao)
+    observacao_norm = _normalizar_texto(observacao)
 
-    descricao_norm = _normalizar_texto(descricao)
-
-    base = f"{descricao_norm}|{valor:.2f}|{data.strftime('%Y-%m-%d')}"
+    base = f"{descricao_norm}|{valor:.2f}|{data.strftime('%Y-%m-%d')}|{observacao_norm}"
 
     return hashlib.sha256(base.encode("utf-8")).hexdigest()

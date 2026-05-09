@@ -1,4 +1,3 @@
-from numpy import True_
 from sqlalchemy import (
     Column,
     Integer,
@@ -55,7 +54,7 @@ class Lancamento(Base):
     hash_transacao = Column(String(255), nullable=True, unique=True, index=True) # 🔥 usado para evitar duplicação via CSV
     observacao = Column(String(255), nullable=True)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
-    atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
+    atualizado_em = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # relacionamento
     finalidade = relationship("Finalidade", foreign_keys=[finalidade_id], back_populates="lancamentos")

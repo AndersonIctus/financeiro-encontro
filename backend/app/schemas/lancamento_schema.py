@@ -37,7 +37,7 @@ class LancamentoResponse(LancamentoBase):
     sugestao_finalidade: Optional[FinalidadeResponse] = None
     
     criado_em: datetime
-    atualizado_em: datetime
+    atualizado_em: Optional[datetime] = None
 
     class Config:
         from_attributes = True

@@ -33,12 +33,15 @@ class ConciliacaoService:
             else TipoLancamento.DESPESA
         )
         
+        observacao = dto.observacao or f"Importado de {dto.banco}"
+
         hash_value = gerar_hash(
             dto.descricao,
             dto.valor,
-            dto.data
+            dto.data,
+            observacao,
         )
-        
+
         sugestao_id = ConciliacaoService._sugerir_finalidade(dto)
 
         return {
@@ -49,7 +52,7 @@ class ConciliacaoService:
             "status": StatusLancamento.NAO_CONCILIADO,
             "data_pagamento": dto.data,
             "hash_transacao": hash_value,
-            "observacao": dto.observacao or f"Importado de {dto.banco}",
+            "observacao": observacao,
             "finalidade_id": None,
             "sugestao_finalidade_id": sugestao_id
         }
