@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MaterialGlobalModule } from '../../shared/modules/material.imports.module';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { Usuario } from '../../models/usuario.model';
 
 interface NavItem {
@@ -20,7 +21,7 @@ interface NavSection {
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MaterialGlobalModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MaterialGlobalModule, ToastComponent],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
 })
