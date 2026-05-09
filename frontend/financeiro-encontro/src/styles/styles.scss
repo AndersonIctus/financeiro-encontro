@@ -6,6 +6,7 @@
 @use 'abstracts/functions';
 @use 'abstracts/mixins';
 @use 'abstracts/placeholders';
+@use 'abstracts/colors';
 
 // ─── Base ─────────────────────────────────────────────────────────────────────
 @use 'base/reset';
@@ -21,7 +22,6 @@
 @use 'components/side-menu';
 @use 'components/btn';
 @use 'components/spinner';
-@use 'components/grid';
 
 
 .mat-mdc-dialog-surface, .mdc-dialog__surface {
