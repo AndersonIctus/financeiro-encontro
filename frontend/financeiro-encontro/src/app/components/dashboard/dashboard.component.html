@@ -8,21 +8,21 @@
       <form [formGroup]="formFilters" (ngSubmit)="buscar()" class="grid grid-cols-12 gap-x-4 items-start">
 
         <!-- mobile: 1 por linha | md: 2 por linha | lg: 4 por linha -->
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-3">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-3">
           <mat-label>Data início</mat-label>
           <input matInput [matDatepicker]="pickerInicio" formControlName="data_inicio" placeholder="DD/MM/AAAA">
           <mat-datepicker-toggle matIconSuffix [for]="pickerInicio" />
           <mat-datepicker #pickerInicio />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-3">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-3">
           <mat-label>Data fim</mat-label>
           <input matInput [matDatepicker]="pickerFim" formControlName="data_fim" placeholder="DD/MM/AAAA">
           <mat-datepicker-toggle matIconSuffix [for]="pickerFim" />
           <mat-datepicker #pickerFim />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-3">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-3">
           <mat-label>Tipo</mat-label>
           <mat-select formControlName="tipo">
             @for (op of tipoOpcoes; track op.value) {
@@ -31,7 +31,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-3">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-3">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
             @for (op of statusOpcoes; track op.value) {
@@ -56,7 +56,7 @@
         </app-multi-select>
 
         <!-- mobile: linha inteira | lg: ⅓ alinhado à direita -->
-        <div class="col-span-12 lg:col-span-4 flex items-start justify-end">
+        <div class="col-end-13 !pb-2 flex items-start justify-end">
           <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="filter-btn">
             <mat-icon>search</mat-icon>
             Buscar

@@ -1,8 +1,22 @@
+// ─── Mixin: sobrescreve o shape radius nos tokens MDC do Material ─────────────
+// Uso: @include mat-btn-radius(4px)  →  aplica em filled, outlined, text e protected
+@mixin mat-btn-radius($radius) {
+  --mdc-filled-button-container-shape:    #{$radius};
+  --mdc-outlined-button-container-shape:  #{$radius};
+  --mdc-text-button-container-shape:      #{$radius};
+  --mdc-protected-button-container-shape: #{$radius};
+  --mat-button-filled-container-shape:    #{$radius};
+}
+
 .btn {
-  border-radius: 4px;
-  
+  @include mat-btn-radius(4px);
+
   // ─── Largura ──────────────────────────────────────────────────────────────
   &--full { width: 100%; }
+
+  // ─── Variantes de shape ───────────────────────────────────────────────────
+  &--rounded { @include mat-btn-radius(999px); }
+  &--square  { @include mat-btn-radius(0);     }
 
   // ─── Tamanhos ─────────────────────────────────────────────────────────────
   &--sm {
