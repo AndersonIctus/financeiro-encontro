@@ -17,7 +17,7 @@
             Desconciliar
           </button>
         } @else {
-          <button mat-flat-button color="accent" (click)="conciliar()" [disabled]="loading">
+          <button mat-flat-button color="accent" class="btn" (click)="conciliar()" [disabled]="loading">
             <mat-icon>check_circle</mat-icon>
             Conciliar
           </button>
@@ -48,8 +48,19 @@
     <mat-card-content>
       <form [formGroup]="form" (ngSubmit)="salvar()" class="grid grid-cols-12 gap-4">
 
+        <!-- Data de Pagamento -->
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-5 lg:col-span-3">
+          <mat-label>Data de Pagamento</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="data_pagamento" placeholder="DD/MM/AAAA">
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-datepicker #picker />
+          @if (form.get('data_pagamento')?.hasError('required') && form.get('data_pagamento')?.touched) {
+            <mat-error>Data é obrigatória</mat-error>
+          }
+        </mat-form-field>
+
         <!-- Descrição (full width) -->
-        <mat-form-field appearance="outline" class="col-span-12">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-7 lg:col-span-6">
           <mat-label>Descrição</mat-label>
           <input matInput formControlName="descricao" placeholder="Ex: Mensalidade, Dízimo...">
           @if (form.get('descricao')?.hasError('required') && form.get('descricao')?.touched) {
@@ -58,7 +69,7 @@
         </mat-form-field>
 
         <!-- Valor -->
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-4">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-3">
           <mat-label>Valor (R$)</mat-label>
           <input matInput type="number" step="0.01" min="0.01" formControlName="valor" placeholder="0,00">
           @if (form.get('valor')?.hasError('required') && form.get('valor')?.touched) {
@@ -70,7 +81,7 @@
         </mat-form-field>
 
         <!-- Tipo -->
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-4">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-4">
           <mat-label>Tipo</mat-label>
           <mat-select formControlName="tipo">
             @for (op of tipoOpcoes; track op.value) {
@@ -83,7 +94,7 @@
         </mat-form-field>
 
         <!-- Forma de Pagamento -->
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-4">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-4">
           <mat-label>Forma de Pagamento</mat-label>
           <mat-select formControlName="forma_pagamento">
             @for (op of formaPagamentoOpcoes; track op.value) {
@@ -95,37 +106,28 @@
           }
         </mat-form-field>
 
-        <!-- Data de Pagamento -->
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-4">
-          <mat-label>Data de Pagamento</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="data_pagamento" placeholder="DD/MM/AAAA">
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker />
-          @if (form.get('data_pagamento')?.hasError('required') && form.get('data_pagamento')?.touched) {
-            <mat-error>Data é obrigatória</mat-error>
-          }
-        </mat-form-field>
-
         <!-- Finalidade -->
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-4">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-4">
           <mat-label>Finalidade</mat-label>
           <mat-select formControlName="finalidade_id">
-            <mat-option [value]="null">Nenhuma</mat-option>
             @for (f of finalidades; track f.id) {
               <mat-option [value]="f.id">{{ f.nome }}</mat-option>
             }
           </mat-select>
+          @if (form.get('finalidade_id')?.hasError('required') && form.get('finalidade_id')?.touched) {
+            <mat-error>Finalidade é obrigatória</mat-error>
+          }
         </mat-form-field>
 
         <!-- Observação -->
-        <mat-form-field appearance="outline" class="col-span-12 lg:col-span-4">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12">
           <mat-label>Observação</mat-label>
           <textarea matInput formControlName="observacao" rows="1" placeholder="Opcional..."></textarea>
         </mat-form-field>
 
         <!-- Ações -->
         <div class="col-span-12 flex justify-end gap-3 pt-2">
-          <button mat-stroked-button type="button" (click)="voltar()" [disabled]="saving">
+          <button mat-stroked-button type="button" (click)="voltar()" [disabled]="saving" class="btn">
             Cancelar
           </button>
           <button mat-flat-button color="primary" type="submit" [disabled]="saving || loading" class="btn btn--icon-left">

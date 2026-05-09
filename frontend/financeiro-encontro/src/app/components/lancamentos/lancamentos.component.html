@@ -12,23 +12,23 @@
   <!-- ─── Filtros ───────────────────────────────────────────────────────────── -->
   <mat-card class="mb-6" appearance="outlined">
     <mat-card-content class="!pb-0">
-      <form [formGroup]="formFilters" (ngSubmit)="buscar()" class="grid grid-cols-12 gap-4 items-start">
+      <form [formGroup]="formFilters" (ngSubmit)="buscar()" class="grid grid-cols-12 gap-x-4 items-start">
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-3">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-4 lg:col-span-3 xl:col-span-2">
           <mat-label>Data início</mat-label>
           <input matInput [matDatepicker]="pickerInicio" formControlName="data_inicio" placeholder="DD/MM/AAAA">
           <mat-datepicker-toggle matIconSuffix [for]="pickerInicio" />
           <mat-datepicker #pickerInicio />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-6 lg:col-span-3">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-4 lg:col-span-3 xl:col-span-2">
           <mat-label>Data fim</mat-label>
           <input matInput [matDatepicker]="pickerFim" formControlName="data_fim" placeholder="DD/MM/AAAA">
           <mat-datepicker-toggle matIconSuffix [for]="pickerFim" />
           <mat-datepicker #pickerFim />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4 lg:col-span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-4 lg:col-span-3 xl:col-span-2">
           <mat-label>Tipo</mat-label>
           <mat-select formControlName="tipo">
             @for (op of tipoOpcoes; track op.value) {
@@ -37,7 +37,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4 lg:col-span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-4 lg:col-span-3 xl:col-span-2">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
             @for (op of statusOpcoes; track op.value) {
@@ -46,17 +46,17 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4 lg:col-span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-4 lg:col-span-4 xl:col-span-2">
           <mat-label>Finalidade</mat-label>
           <mat-select formControlName="finalidade_id">
-            <mat-option [value]="null">Todas</mat-option>
+            <mat-option [value]="-1">Todas</mat-option>
             @for (f of finalidades; track f.id) {
               <mat-option [value]="f.id">{{ f.nome }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
 
-        <div class="col-span-12 flex justify-end">
+        <div class="col-end-13 !pb-2 flex justify-end">
           <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="filter-btn">
             <mat-icon>search</mat-icon>
             Buscar

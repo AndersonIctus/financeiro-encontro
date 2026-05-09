@@ -66,7 +66,7 @@ export class LancamentosComponent implements OnInit {
       data_fim:      [moment()],
       tipo:          [TipoLancamento.TODOS],
       status:        [StatusLancamento.TODOS],
-      finalidade_id: [null],
+      finalidade_id: [-1],
     });
 
     this.finalSvc.listAll().subscribe({
@@ -128,7 +128,7 @@ export class LancamentosComponent implements OnInit {
       ...(data_fim      && { data_fim:    moment(data_fim).format('YYYY-MM-DDT23:59:59') }),
       ...(tipo          && { tipo }),
       ...(status        && { status }),
-      ...(finalidade_id && { finalidade_id: Number(finalidade_id) }),
+      ...(finalidade_id !== -1 && { finalidade_id: Number(finalidade_id) }),
     };
   }
 }

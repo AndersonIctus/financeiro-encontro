@@ -34,20 +34,20 @@ export class LancamentosFormComponent implements OnInit {
   private fb       = inject(FormBuilder);
   private route    = inject(ActivatedRoute);
   private router   = inject(Router);
-  private lancSvc  = inject(LancamentoService);
-  private finalSvc = inject(FinalidadeService);
+  private lancamentoService  = inject(LancamentoService);
+  private finalidadeService = inject(FinalidadeService);
   private toast    = inject(ToastService);
 
   form!: FormGroup;
   saving     = false;
   loading    = false;
   updatePage = false;
-  lancamentoId: number | null = null;
-  lancamento:   Lancamento | null = null;
+  lancamentoId: number | null   = null;
+  lancamento: Lancamento | null = null;
 
-  finalidades:         Finalidade[] = [];
-  tipoOpcoes           = TipoLancamento.opcoesTipo;
-  formaPagamentoOpcoes = FormaPagamento.opcoesFormaPagamento;
+  finalidades: Finalidade[] = [];
+  tipoOpcoes                = TipoLancamento.opcoesTipo;
+  formaPagamentoOpcoes      = FormaPagamento.opcoesFormaPagamento;
 
   readonly StatusLancamento = StatusLancamento;
 
@@ -62,8 +62,8 @@ export class LancamentosFormComponent implements OnInit {
       tipo:            [TipoLancamento.RECEITA, Validators.required],
       forma_pagamento: [FormaPagamento.PIX, Validators.required],
       data_pagamento:  [moment(), Validators.required],
-      finalidade_id:   [null],
-      observacao:      [null],
+      finalidade_id:   [null, Validators.required],
+      observacao:      [''],
     });
 
     const id = this.route.snapshot.params['id'];
@@ -73,14 +73,26 @@ export class LancamentosFormComponent implements OnInit {
       this.loadValues(this.lancamentoId);
     }
 
-    this.finalSvc.listAll().subscribe({
-      next: (data) => (this.finalidades = data),
+    this.bindSeervices();
+
+    
+  }
+
+  private bindSeervices(): void {
+    this.finalidadeService.listAll().subscribe({
+      next: (data) => {
+        this.finalidades = data
+
+        if (this.finalidades.length > 0) {
+          this.form.get('finalidade_id')?.setValue(this.finalidades[0].id);
+        }
+      }
     });
   }
 
-  loadValues(id: number): void {
+  private loadValues(id: number): void {
     this.loading = true;
-    this.lancSvc.buscarPorId(id).subscribe({
+    this.lancamentoService.buscarPorId(id).subscribe({
       next: (data) => {
         this.lancamento = data;
         this.form.patchValue({
@@ -103,13 +115,18 @@ export class LancamentosFormComponent implements OnInit {
   }
 
   salvar(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) { 
+      this.form.markAllAsTouched();
+      this.toast.warning({ message: 'Preencha todos os campos obrigatórios.' });
+      return; 
+    }
+
     const payload = this.buildPayload();
     this.saving = true;
 
     const req$ = this.updatePage && this.lancamentoId
-      ? this.lancSvc.editar(this.lancamentoId, payload)
-      : this.lancSvc.criar(payload);
+      ? this.lancamentoService.editar(this.lancamentoId, payload)
+      : this.lancamentoService.criar(payload);
 
     const msg = this.updatePage ? 'Lançamento atualizado com sucesso.' : 'Lançamento criado com sucesso.';
 
@@ -133,7 +150,8 @@ export class LancamentosFormComponent implements OnInit {
       this.toast.warning({ message: 'Selecione uma finalidade antes de conciliar.' });
       return;
     }
-    this.lancSvc.conciliar(this.lancamentoId, finalidadeId).subscribe({
+
+    this.lancamentoService.conciliar(this.lancamentoId, finalidadeId).subscribe({
       next: (data) => {
         this.lancamento = data;
         this.toast.success({ message: 'Lançamento conciliado com sucesso.' });
@@ -144,7 +162,7 @@ export class LancamentosFormComponent implements OnInit {
 
   desconciliar(): void {
     if (!this.lancamentoId) return;
-    this.lancSvc.editar(this.lancamentoId, { status: StatusLancamento.NAO_CONCILIADO }).subscribe({
+    this.lancamentoService.editar(this.lancamentoId, { status: StatusLancamento.NAO_CONCILIADO }).subscribe({
       next: (data) => {
         this.lancamento = data;
         this.toast.success({ message: 'Lançamento desconciliado.' });

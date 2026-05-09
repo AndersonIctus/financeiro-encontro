@@ -32,8 +32,13 @@ export class ToastService {
   readonly toasts$ = new BehaviorSubject<ToastMessage[]>([]);
 
   success(options: ToastOptions): void { this._add(ToastType.SUCCESS, options); }
-  error(options: ToastOptions):   void { this._add(ToastType.ERROR,   options); }
   warning(options: ToastOptions): void { this._add(ToastType.WARNING, options); }
+  error(options: ToastOptions):   void { 
+    if(options.duration === undefined){
+      options.duration = ToastDuration.ALWAYS;
+    }
+    this._add(ToastType.ERROR,   options); 
+}
 
   dismiss(id: number): void {
     this.toasts$.next(this.toasts$.value.filter(t => t.id !== id));
