@@ -18,7 +18,20 @@ export const routes: Routes = [
       },
       {
         path: 'lancamentos',
-        loadComponent: () => import('./components/lancamentos/lancamentos.component').then(m => m.LancamentosComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./components/lancamentos/lancamentos.component').then(m => m.LancamentosComponent),
+          },
+          {
+            path: 'novo',
+            loadComponent: () => import('./components/lancamentos/lancamentos-form/lancamentos-form.component').then(m => m.LancamentosFormComponent),
+          },
+          {
+            path: ':id/editar',
+            loadComponent: () => import('./components/lancamentos/lancamentos-form/lancamentos-form.component').then(m => m.LancamentosFormComponent),
+          },
+        ],
       },
       {
         path: 'conciliacao',

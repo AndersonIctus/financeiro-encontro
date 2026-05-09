@@ -1,0 +1,164 @@
+import { Component, inject, OnInit }  from '@angular/core';
+import { CommonModule }               from '@angular/common';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router }     from '@angular/router';
+import moment                         from 'moment';
+
+import {
+  MaterialGlobalModule,
+  MaterialFormsModule,
+  MaterialDatepickerModule,
+} from '../../../shared/modules/material.imports.module';
+import { ToastService }       from '../../../shared/components/toast/toast.service';
+import { LancamentoService }  from '../../../services/lancamento.service';
+import { FinalidadeService }  from '../../../services/finalidade.service';
+import { Lancamento }         from '../../../models/lancamento.model';
+import { Finalidade }         from '../../../models/finalidade.model';
+import { TipoLancamento }     from '../../../models/constants/tipo-lancamento';
+import { StatusLancamento }   from '../../../models/constants/status-lancamento';
+import { FormaPagamento }     from '../../../models/constants/forma-pagamento';
+
+@Component({
+  selector: 'app-lancamentos-form',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MaterialGlobalModule,
+    MaterialFormsModule,
+    MaterialDatepickerModule,
+  ],
+  templateUrl: './lancamentos-form.component.html',
+  styleUrl:    './lancamentos-form.component.scss',
+})
+export class LancamentosFormComponent implements OnInit {
+  private fb       = inject(FormBuilder);
+  private route    = inject(ActivatedRoute);
+  private router   = inject(Router);
+  private lancSvc  = inject(LancamentoService);
+  private finalSvc = inject(FinalidadeService);
+  private toast    = inject(ToastService);
+
+  form!: FormGroup;
+  saving     = false;
+  loading    = false;
+  updatePage = false;
+  lancamentoId: number | null = null;
+  lancamento:   Lancamento | null = null;
+
+  finalidades:         Finalidade[] = [];
+  tipoOpcoes           = TipoLancamento.opcoesTipo;
+  formaPagamentoOpcoes = FormaPagamento.opcoesFormaPagamento;
+
+  readonly StatusLancamento = StatusLancamento;
+
+  get isConciliado(): boolean {
+    return this.lancamento?.status === StatusLancamento.CONCILIADO;
+  }
+
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      descricao:       ['', Validators.required],
+      valor:           [null, [Validators.required, Validators.min(0.01)]],
+      tipo:            [TipoLancamento.RECEITA, Validators.required],
+      forma_pagamento: [FormaPagamento.PIX, Validators.required],
+      data_pagamento:  [moment(), Validators.required],
+      finalidade_id:   [null],
+      observacao:      [null],
+    });
+
+    const id = this.route.snapshot.params['id'];
+    if (id) {
+      this.updatePage   = true;
+      this.lancamentoId = Number(id);
+      this.loadValues(this.lancamentoId);
+    }
+
+    this.finalSvc.listAll().subscribe({
+      next: (data) => (this.finalidades = data),
+    });
+  }
+
+  loadValues(id: number): void {
+    this.loading = true;
+    this.lancSvc.buscarPorId(id).subscribe({
+      next: (data) => {
+        this.lancamento = data;
+        this.form.patchValue({
+          descricao:       data.descricao,
+          valor:           data.valor,
+          tipo:            data.tipo,
+          forma_pagamento: data.forma_pagamento,
+          data_pagamento:  moment(data.data_pagamento),
+          finalidade_id:   data.finalidade_id,
+          observacao:      data.observacao,
+        });
+        this.loading = false;
+      },
+      error: (err) => {
+        this.toast.error({ message: err?.error?.detail ?? 'Erro ao carregar lançamento.' });
+        this.loading = false;
+        this.voltar();
+      },
+    });
+  }
+
+  salvar(): void {
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    const payload = this.buildPayload();
+    this.saving = true;
+
+    const req$ = this.updatePage && this.lancamentoId
+      ? this.lancSvc.editar(this.lancamentoId, payload)
+      : this.lancSvc.criar(payload);
+
+    const msg = this.updatePage ? 'Lançamento atualizado com sucesso.' : 'Lançamento criado com sucesso.';
+
+    req$.subscribe({
+      next: () => {
+        this.toast.success({ message: msg });
+        this.saving = false;
+        this.voltar();
+      },
+      error: (err) => {
+        this.toast.error({ message: err?.error?.detail ?? 'Erro ao salvar lançamento.' });
+        this.saving = false;
+      },
+    });
+  }
+
+  conciliar(): void {
+    if (!this.lancamentoId) return;
+    const finalidadeId = this.form.value.finalidade_id;
+    if (!finalidadeId) {
+      this.toast.warning({ message: 'Selecione uma finalidade antes de conciliar.' });
+      return;
+    }
+    this.lancSvc.conciliar(this.lancamentoId, finalidadeId).subscribe({
+      next: (data) => {
+        this.lancamento = data;
+        this.toast.success({ message: 'Lançamento conciliado com sucesso.' });
+      },
+      error: (err) => this.toast.error({ message: err?.error?.detail ?? 'Erro ao conciliar.' }),
+    });
+  }
+
+  desconciliar(): void {
+    if (!this.lancamentoId) return;
+    this.lancSvc.editar(this.lancamentoId, { status: StatusLancamento.NAO_CONCILIADO }).subscribe({
+      next: (data) => {
+        this.lancamento = data;
+        this.toast.success({ message: 'Lançamento desconciliado.' });
+      },
+      error: (err) => this.toast.error({ message: err?.error?.detail ?? 'Erro ao desconciliar.' }),
+    });
+  }
+
+  voltar(): void {
+    this.router.navigate(['/lancamentos']);
+  }
+
+  private buildPayload() {
+    const { data_pagamento, ...rest } = this.form.value;
+    return { ...rest, data_pagamento: moment(data_pagamento).format('YYYY-MM-DDT00:00:00') };
+  }
+}
