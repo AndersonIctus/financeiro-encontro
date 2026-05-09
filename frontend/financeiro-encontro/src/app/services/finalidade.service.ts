@@ -14,12 +14,12 @@ export class FinalidadeService extends AbstractService<Finalidade> {
     super(http, 'finalidades');
   }
 
-  list(request: FinalidadeFilterDto, pagination?: PageRequest): Observable<PageTemplate<Finalidade>> {
+  list(request: FinalidadeFilterDto = {}, pagination?: PageRequest): Observable<PageTemplate<Finalidade>> {
     const params = Object.assign({}, request, pagination);
     return this.getCustom<PageTemplate<Finalidade>>('', { params });
   }
 
-  listAll(request: FinalidadeFilterDto): Observable<Finalidade[]> {
+  listAll(request: FinalidadeFilterDto = {}): Observable<Finalidade[]> {
     const params = Object.assign({}, request);
     return this.getCustom<Finalidade[]>('/all', { params });
   }

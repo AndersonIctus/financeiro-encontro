@@ -3,7 +3,8 @@
     "allow": [
       "PowerShell(Get-ChildItem \"c:\\\\00_DADOS\\\\REPO\\\\financeiro-encontro\\\\frontend\" -Name | Where-Object { $_ -notmatch \"financeiro-encontro\" })",
       "Bash(npm audit *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
