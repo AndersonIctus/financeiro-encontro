@@ -9,12 +9,14 @@ import { LancamentoFilterDto } from './dto/lancamento-filter.dto';
 
 @Injectable({ providedIn: 'root' })
 export class LancamentoService extends AbstractService<Lancamento> {
-
   constructor(http: HttpClient) {
     super(http, 'lancamentos');
   }
 
-  list(request: LancamentoFilterDto, pagination?: PageRequest): Observable<PageTemplate<Lancamento>> {
+  list(
+    request: LancamentoFilterDto,
+    pagination?: PageRequest,
+  ): Observable<PageTemplate<Lancamento>> {
     const params = Object.assign({}, request, pagination);
     return this.getCustom<PageTemplate<Lancamento>>('', { params });
   }
@@ -41,8 +43,6 @@ export class LancamentoService extends AbstractService<Lancamento> {
   }
 
   conciliar(id: number, finalidadeId: number): Observable<Lancamento> {
-    return this.patch<Lancamento>(
-      null, undefined, `/conciliar/${id}/finalidade/${finalidadeId}`
-    );
+    return this.patch<Lancamento>(null, `/conciliar/${id}/finalidade/${finalidadeId}`);
   }
 }

@@ -38,11 +38,8 @@ export abstract class AbstractService<M = any> {
               .put<T>(_url, model, this.getOptions(options));
     }
 
-    patch<T = any>(model: any, id?: number, action: string = '', options?: any): Observable<T> {
+    patch<T = any>(model: any, action: string = '', options?: any): Observable<T> {
       let _url = `${this._url}/${this._actionUrl}`;
-      if (id !== null) {
-        _url += `/${id}`;
-      }
       _url += `${action}`;
 
       return this._http
