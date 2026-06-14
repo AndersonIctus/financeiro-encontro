@@ -1,5 +1,6 @@
-import { Component, inject, OnInit }          from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { Component, inject, OnInit, AfterViewInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { CurrencyBRPipe }        from '../../shared/pipes/currency-br.pipe';
 import { FormBuilder, FormGroup }               from '@angular/forms';
 import { Router }                               from '@angular/router';
 import { MatDialog }                            from '@angular/material/dialog';
@@ -25,9 +26,10 @@ import { FormaPagamento }         from '../../models/constants/forma-pagamento';
 @Component({
   selector: 'app-lancamentos',
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [
     CommonModule,
-    CurrencyPipe,
+    CurrencyBRPipe,
     DatePipe,
     MaterialGlobalModule,
     MaterialFormsModule,
@@ -36,13 +38,14 @@ import { FormaPagamento }         from '../../models/constants/forma-pagamento';
   templateUrl: './lancamentos.component.html',
   styleUrl:    './lancamentos.component.scss',
 })
-export class LancamentosComponent implements OnInit {
+export class LancamentosComponent implements OnInit, AfterViewInit {
   private fb       = inject(FormBuilder);
   private router   = inject(Router);
   private dialog   = inject(MatDialog);
-  private lancSvc  = inject(LancamentoService);
-  private finalSvc = inject(FinalidadeService);
-  private toast    = inject(ToastService);
+  private lancamentoService = inject(LancamentoService);
+  private finalidadeService = inject(FinalidadeService);
+  private toast = inject(ToastService);
+  private cdr   = inject(ChangeDetectorRef);
 
   formFilters!: FormGroup;
   result: PageTemplate<Lancamento> = new PageTemplate<Lancamento>();
@@ -50,7 +53,7 @@ export class LancamentosComponent implements OnInit {
   pageIndex  = 0;
   pageSize   = 10;
 
-  finalidades:  Finalidade[] = [];
+  finalidades: Finalidade[] = [];
   tipoOpcoes   = TipoLancamento.opcoesTipoTodos;
   statusOpcoes = StatusLancamento.opcoesStatusLancamentoTodos;
 
@@ -58,7 +61,7 @@ export class LancamentosComponent implements OnInit {
   readonly StatusLancamento = StatusLancamento;
   readonly FormaPagamento   = FormaPagamento;
 
-  displayedColumns = ['data_pagamento', 'descricao', 'finalidade', 'forma_pagamento', 'valor', 'status', 'acoes'];
+  displayedColumns = ['data_pagamento', 'status', 'descricao', 'finalidade', 'forma_pagamento', 'valor', 'acoes'];
 
   ngOnInit(): void {
     this.formFilters = this.fb.group({
@@ -68,10 +71,17 @@ export class LancamentosComponent implements OnInit {
       status:        [StatusLancamento.TODOS],
       finalidade_id: [-1],
     });
+  }
 
-    this.finalSvc.listAll().subscribe({
-      next: (data) => { this.finalidades = data; this.buscar(); },
-      error: ()    => this.buscar(),
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.finalidadeService.listAll().subscribe({
+        next: (data) => { 
+          this.finalidades = data; 
+          this.buscar(); 
+        },
+        error: ()    => this.buscar(),
+      });
     });
   }
 
@@ -82,9 +92,19 @@ export class LancamentosComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.lancSvc.list(this.buildFilter(), { skip: this.pageIndex * this.pageSize, limit: this.pageSize }).subscribe({
-      next: (data) => { this.result = data; this.loading = false; },
-      error: ()    => { this.loading = false; },
+    const filters = this.buildFilter();
+    
+    this.lancamentoService.list(filters, { skip: this.pageIndex * this.pageSize, limit: this.pageSize })
+    .subscribe({
+      next: (data) => { 
+        this.result = data; 
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { 
+        this.loading = false; 
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -107,7 +127,7 @@ export class LancamentosComponent implements OnInit {
       },
     }).afterClosed().subscribe((ok: boolean) => {
       if (!ok) return;
-      this.lancSvc.remover(l.id).subscribe({
+      this.lancamentoService.remover(l.id).subscribe({
         next: () => {
           this.toast.success({ message: 'Lançamento excluído com sucesso.' });
           this.load();
@@ -117,17 +137,21 @@ export class LancamentosComponent implements OnInit {
     });
   }
 
-  getFinalidade(l: Lancamento): string {
-    return l.sugestao_finalidade?.nome ?? '—';
+  getFinalidade(lanc: Lancamento): string {
+    const finalidade = this.finalidades.find(f => f.id === lanc.finalidade_id);
+    if (finalidade) 
+      return finalidade.nome;
+
+    return '-';
   }
 
   private buildFilter() {
     const { data_inicio, data_fim, tipo, status, finalidade_id } = this.formFilters.value;
     return {
-      ...(data_inicio   && { data_inicio: moment(data_inicio).format('YYYY-MM-DDT00:00:00') }),
-      ...(data_fim      && { data_fim:    moment(data_fim).format('YYYY-MM-DDT23:59:59') }),
-      ...(tipo          && { tipo }),
-      ...(status        && { status }),
+      ...(data_inicio && { data_inicio: moment(data_inicio).format('YYYY-MM-DDT00:00:00') }),
+      ...(data_fim    && { data_fim: moment(data_fim).format('YYYY-MM-DDT23:59:59') }),
+      ...(tipo        && { tipo }),
+      ...(status      && { status }),
       ...(finalidade_id !== -1 && { finalidade_id: Number(finalidade_id) }),
     };
   }

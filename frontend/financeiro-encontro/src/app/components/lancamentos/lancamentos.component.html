@@ -75,7 +75,7 @@
         <mat-progress-bar mode="indeterminate" />
       }
 
-      <mat-table [dataSource]="result.items">
+      <mat-table [dataSource]="result.items" class="lancamentos-table">
 
         <!-- Data de Pagamento -->
         <ng-container matColumnDef="data_pagamento">
@@ -85,10 +85,22 @@
           </mat-cell>
         </ng-container>
 
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <span class="status-chip"
+                  [class.status-chip--conciliado]="row.status === StatusLancamento.CONCILIADO"
+                  [class.status-chip--nao-conciliado]="row.status === StatusLancamento.NAO_CONCILIADO">
+              {{ StatusLancamento.getStatusLancamentoDescricao(row.status) }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
         <!-- Descrição -->
         <ng-container matColumnDef="descricao">
           <mat-header-cell *matHeaderCellDef>Descrição</mat-header-cell>
-          <mat-cell *matCellDef="let row" class="cell-descricao" [matTooltip]="row.descricao">
+          <mat-cell *matCellDef="let row" [matTooltip]="row.descricao">
             {{ row.descricao }}
           </mat-cell>
         </ng-container>
@@ -109,31 +121,19 @@
 
         <!-- Valor -->
         <ng-container matColumnDef="valor">
-          <mat-header-cell *matHeaderCellDef class="col-valor">Valor</mat-header-cell>
-          <mat-cell *matCellDef="let row" class="col-valor">
+          <mat-header-cell *matHeaderCellDef>Valor</mat-header-cell>
+          <mat-cell *matCellDef="let row">
             <span [class.valor--despesa]="row.tipo === TipoLancamento.DESPESA"
                   [class.valor--receita]="row.tipo === TipoLancamento.RECEITA">
-              {{ row.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-            </span>
-          </mat-cell>
-        </ng-container>
-
-        <!-- Status -->
-        <ng-container matColumnDef="status">
-          <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-          <mat-cell *matCellDef="let row">
-            <span class="status-chip"
-                  [class.status-chip--conciliado]="row.status === StatusLancamento.CONCILIADO"
-                  [class.status-chip--nao-conciliado]="row.status === StatusLancamento.NAO_CONCILIADO">
-              {{ StatusLancamento.getStatusLancamentoDescricao(row.status) }}
+              {{ row.valor | currencyBR }}
             </span>
           </mat-cell>
         </ng-container>
 
         <!-- Ações -->
         <ng-container matColumnDef="acoes">
-          <mat-header-cell *matHeaderCellDef class="col-acoes"></mat-header-cell>
-          <mat-cell *matCellDef="let row" class="col-acoes">
+          <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
+          <mat-cell *matCellDef="let row">
             <button mat-icon-button color="primary" matTooltip="Editar" (click)="editar(row.id)">
               <mat-icon>edit</mat-icon>
             </button>
