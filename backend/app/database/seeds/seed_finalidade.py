@@ -6,8 +6,8 @@ from app.models.finalidade import Finalidade
 DEFAULT_FINALIDADES = [
     {"id": 1, "nome": "OFERTA"},
     {"id": 2, "nome": "CAMPANHA"},
-    {"id": 3, "nome": "INSCRICAO_ENCONTRISTA"},
-    {"id": 4, "nome": "INSCRICAO_ENCONTREIRO"},
+    {"id": 3, "nome": "INSCRICAO ENCONTRISTA"},
+    {"id": 4, "nome": "INSCRICAO ENCONTREIRO"},
     {"id": 99, "nome": "OUTROS"},
 ]
 
