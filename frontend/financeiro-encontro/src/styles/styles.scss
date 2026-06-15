@@ -17,6 +17,7 @@
 @use 'layout/validation';
 
 // ─── Components ───────────────────────────────────────────────────────────────
+@use 'components/card';
 @use 'components/div';
 @use 'components/divisor';
 @use 'components/side-menu';
@@ -26,4 +27,10 @@
 
 .mat-mdc-dialog-surface, .mdc-dialog__surface {
     border-radius: 8px !important;
+}
+
+/* Força o reset específico para os elementos internos do spinner do Angular Material */
+mat-spinner svg, 
+mat-progress-spinner svg {
+  max-width: none !important; /* Impede o Tailwind de achatar o SVG */
 }
