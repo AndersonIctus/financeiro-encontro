@@ -113,13 +113,17 @@ export class LancamentosFormComponent implements OnInit {
 
   conciliar(): void {
     if (!this.lancamentoId) return;
-    const finalidadeId = this.form.value.finalidade_id;
-    if (!finalidadeId) {
+    const { finalidade_id, observacao } = this.form.value;
+    if (!finalidade_id) {
       this.toast.warning({ message: 'Selecione uma finalidade antes de conciliar.' });
       return;
     }
 
-    this.lancamentoService.conciliar(this.lancamentoId, finalidadeId).subscribe({
+    this.lancamentoService.editar(this.lancamentoId, {
+      finalidade_id,
+      status: StatusLancamento.CONCILIADO,
+      ...(observacao ? { observacao } : {}),
+    }).subscribe({
       next: (data) => {
         this.lancamento = data;
         this.toast.success({ message: 'Lançamento conciliado com sucesso.' });

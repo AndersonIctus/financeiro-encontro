@@ -4,4 +4,5 @@ export interface LancamentoFilterDto {
   status?:        string;
   tipo?:          string;
   finalidade_id?: number;
+  descricao?:     string;
 }

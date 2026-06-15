@@ -42,7 +42,8 @@ export class LancamentoService extends AbstractService<Lancamento> {
     return this.delete(id);
   }
 
-  conciliar(id: number, finalidadeId: number): Observable<Lancamento> {
-    return this.patch<Lancamento>(null, `/conciliar/${id}/finalidade/${finalidadeId}`);
+  conciliar(id: number, finalidadeId: number, observacao?: string): Observable<Lancamento> {
+    const body = observacao != null ? { observacao } : null;
+    return this.patch<Lancamento>(body, `/conciliar/${id}/finalidade/${finalidadeId}`);
   }
 }
