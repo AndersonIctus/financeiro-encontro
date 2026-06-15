@@ -1,20 +1,18 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime
 
-from app.database.session import SessionLocal
-from app.services.lancamento_service import LancamentoService
-from app.schemas.lancamento_schema import (
-    LancamentoCreate,
-    LancamentoUpdate,
-    LancamentoResponse
-)
-from app.models.enums import StatusLancamento, TipoLancamento
-from app.schemas.pagination_schema import Page
-from app.schemas.lancamento_filter_dto import LancamentoFilterDto
+from fastapi import APIRouter, Body, Depends
+from sqlalchemy.orm import Session
+
 from app.database.session import get_db
-
+from app.schemas.lancamento_filter_dto import LancamentoFilterDto
+from app.schemas.lancamento_schema import (
+    LancamentoConciliarRequest,
+    LancamentoCreate,
+    LancamentoResponse,
+    LancamentoUpdate,
+)
+from app.schemas.pagination_schema import Page
+from app.services.lancamento_service import LancamentoService
 
 router = APIRouter(prefix="/lancamentos", tags=["Lançamentos"])
 
@@ -25,11 +23,12 @@ def create(data: LancamentoCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=Page[LancamentoResponse])
-def list(
+def list_lancamentos(
     params: LancamentoFilterDto = Depends(),
     db: Session = Depends(get_db),
 ):
     return LancamentoService.list(db, params)
+
 
 @router.get("/all", response_model=List[LancamentoResponse])
 def list_all(
@@ -37,6 +36,7 @@ def list_all(
     db: Session = Depends(get_db),
 ):
     return LancamentoService.list_all(db, params)
+
 
 @router.get("/{lancamento_id}", response_model=LancamentoResponse)
 def get_by_id(lancamento_id: int, db: Session = Depends(get_db)):
@@ -59,12 +59,14 @@ def delete(lancamento_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch(
-    "/conciliar/{lancamento_id}/finalidade/{finalidade_id}", 
-    response_model=LancamentoResponse
+    "/conciliar/{lancamento_id}/finalidade/{finalidade_id}",
+    response_model=LancamentoResponse,
 )
 def conciliar_lancamento(
     lancamento_id: int,
     finalidade_id: int,
+    data: Optional[LancamentoConciliarRequest] = Body(default=None),
     db: Session = Depends(get_db),
 ):
-    return LancamentoService.conciliar(db, lancamento_id, finalidade_id)
+    observacao = data.observacao if data else None
+    return LancamentoService.conciliar(db, lancamento_id, finalidade_id, observacao)

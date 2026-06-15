@@ -80,7 +80,7 @@ class LancamentoService:
         )
 
     @staticmethod
-    def conciliar(db: Session, lancamento_id: int, finalidade_id: int):
+    def conciliar(db: Session, lancamento_id: int, finalidade_id: int, observacao: str | None = None):
         from app.services.finalidade_service import FinalidadeService
         try:
             obj = LancamentoRepository.get_by_id(db, lancamento_id)
@@ -91,6 +91,8 @@ class LancamentoService:
 
             obj.finalidade_id = finalidade_id
             obj.status = StatusLancamento.CONCILIADO
+            if observacao is not None:
+                obj.observacao = observacao
             db.commit()
             db.refresh(obj)
             return obj

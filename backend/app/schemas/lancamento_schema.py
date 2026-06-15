@@ -20,6 +20,10 @@ class LancamentoCreate(LancamentoBase):
     pass
 
 
+class LancamentoConciliarRequest(BaseModel):
+    observacao: Optional[str] = None
+
+
 class LancamentoUpdate(BaseModel):
     descricao: Optional[str] = None
     valor: Optional[float] = None

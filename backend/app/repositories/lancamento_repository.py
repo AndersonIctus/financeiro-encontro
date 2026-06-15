@@ -58,6 +58,9 @@ class LancamentoRepository:
         if params.finalidade_id:
             query = query.filter(Lancamento.finalidade_id == params.finalidade_id)
 
+        if params.descricao:
+            query = query.filter(Lancamento.descricao.ilike(f"%{params.descricao}%"))
+
         if params.limit > 1000 or params.limit <= 0:
             params.limit = 1000
 
@@ -83,6 +86,9 @@ class LancamentoRepository:
 
         if params.finalidade_id:
             query = query.filter(Lancamento.finalidade_id == params.finalidade_id)
+
+        if params.descricao:
+            query = query.filter(Lancamento.descricao.ilike(f"%{params.descricao}%"))
 
         query = apply_sort(query, Lancamento, params.sort, SORT_FIELDS, DEFAULT_SORT)
 

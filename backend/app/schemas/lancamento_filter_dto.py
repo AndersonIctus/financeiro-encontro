@@ -11,3 +11,4 @@ class LancamentoFilterDto(QueryParams):
     status: Optional[StatusLancamento] = None
     tipo: Optional[TipoLancamento] = None
     finalidade_id: Optional[int] = None
+    descricao: Optional[str] = None
