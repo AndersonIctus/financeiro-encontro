@@ -1,6 +1,5 @@
 <mat-card class="conciliacao-card">
   <mat-card-content>
-
     <!-- chips de tipo e forma de pagamento -->
     <div class="card-chips">
       <span class="chip" [ngClass]="getTipoClass()">
@@ -12,14 +11,17 @@
     <!-- descrição e valor -->
     <div class="card-header-info">
       <span class="descricao">{{ lancamento.descricao }}</span>
-      <span class="valor" [ngClass]="lancamento.tipo === TipoLancamento.RECEITA ? 'valor-receita' : 'valor-despesa'">
+      <span
+        class="valor"
+        [ngClass]="lancamento.tipo === TipoLancamento.RECEITA ? 'valor-receita' : 'valor-despesa'"
+      >
         {{ lancamento.valor | currencyBR }}
       </span>
     </div>
 
     <div class="card-data">
       <mat-icon>calendar_today</mat-icon>
-      <span>{{ lancamento.data_pagamento | date:'dd/MM/yyyy' }}</span>
+      <span>{{ lancamento.data_pagamento | date: 'dd/MM/yyyy' }}</span>
     </div>
 
     @if (lancamento.observacao) {
@@ -44,7 +46,12 @@
 
       <mat-form-field appearance="outline" class="field-full">
         <mat-label>Observação (opcional)</mat-label>
-        <textarea matInput [(ngModel)]="observacaoConciliar" rows="2" placeholder="Adicione uma observação..."></textarea>
+        <textarea
+          matInput
+          [(ngModel)]="observacaoConciliar"
+          rows="2"
+          placeholder="Adicione uma observação..."
+        ></textarea>
       </mat-form-field>
 
       <button
@@ -52,17 +59,17 @@
         color="primary"
         class="btn-conciliar"
         [disabled]="conciliando || !selectedFinalidadeId"
-        (click)="conciliar()">
+        (click)="conciliar()"
+      >
         @if (conciliando) {
-          <mat-spinner diameter="18"></mat-spinner>
+          <mat-spinner diameter="32"></mat-spinner>
         } @else {
-          <ng-container>
+          <span>
             <mat-icon>check_circle</mat-icon>
             CONCILIAR
-          </ng-container>
+          </span>
         }
       </button>
     </div>
-
   </mat-card-content>
 </mat-card>
