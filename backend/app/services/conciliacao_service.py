@@ -22,8 +22,11 @@ class ConciliacaoService:
 
         if "inscricao" in descricao:
             return 3
-
-        return 1 # padrão retorna oferta!
+        
+        if dto.tipo == "entrada":
+            return 1 # padrão retorna oferta para receitas
+        else:
+            return 4 # padrão retorna despesa geral para despesas
     
     @staticmethod
     def _to_lancamento_dict(dto):
@@ -33,7 +36,7 @@ class ConciliacaoService:
             else TipoLancamento.DESPESA
         )
         
-        observacao = dto.observacao or f"Importado de {dto.banco}"
+        observacao = dto.observacao or ""
 
         hash_value = gerar_hash(
             dto.descricao,
@@ -65,8 +68,18 @@ class ConciliacaoService:
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
 
-        with open(file_path, "wb") as buffer:
-            buffer.write(file.file.read())
+        # Ler conteúdo do arquivo tentando UTF-8 primeiro
+        conteudo_bytes = file.file.read()
+        
+        # Tentar decodificar com UTF-8, lança exceção se falhar
+        try:
+            conteudo = conteudo_bytes.decode('utf-8')
+        except UnicodeDecodeError:
+            raise Exception("Erro ao processar arquivo. Utilize o charset UTF-8 para evitar problemas de acentuação.")
+        
+        # Salvar arquivo com encoding UTF-8
+        with open(file_path, "w", encoding="utf-8") as buffer:
+            buffer.write(conteudo)
 
         extrato = ExtratoBancarioService.create(db, {
             "nome_arquivo": file.filename,
@@ -105,13 +118,10 @@ class ConciliacaoService:
             )
 
             return {
-                "extrato_id": extrato.id,
-                "total_processado": resultado["total_processado"],
-                "total_inserido": resultado["total_novos"],
-                "total_duplicados": resultado["total_duplicados"],
-                "total_erros": resultado["total_erros"],
-                "duplicados": resultado["duplicados"] if resultado["total_duplicados"] > 0 else [],
-                "erros": resultado["erros"] if resultado["total_erros"] > 0 else []
+                "inseridos": resultado["total_novos"],
+                "duplicados": resultado["total_duplicados"],
+                "erros": resultado["total_erros"],
+                "mensagem": f"Processamento concluído. {resultado['total_novos']} inseridos, {resultado['total_duplicados']} duplicados, {resultado['total_erros']} erros."
             }
 
         except Exception as e:

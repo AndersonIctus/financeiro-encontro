@@ -22,7 +22,13 @@ class BancoInterParser(BaseParser):
         result = []
         erros = []
 
-        with open(file_path, encoding="latin1") as csvfile:
+        # Tentar UTF-8 primeiro, fallback para latin-1
+        try:
+            csvfile = open(file_path, encoding="utf-8")
+        except UnicodeDecodeError:
+            csvfile = open(file_path, encoding="latin-1")
+        
+        with csvfile:
             reader = csv.reader(csvfile, delimiter=";")
 
             header_found = False
