@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
@@ -25,8 +25,10 @@ def create(data: LancamentoCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=Page[LancamentoResponse])
 def list_lancamentos(
     params: LancamentoFilterDto = Depends(),
+    exclude_ids: Optional[List[int]] = Query(default=None),
     db: Session = Depends(get_db),
 ):
+    params.exclude_ids = exclude_ids
     return LancamentoService.list(db, params)
 
 

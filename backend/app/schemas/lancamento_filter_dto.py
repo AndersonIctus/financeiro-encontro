@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from app.models.enums import StatusLancamento, TipoLancamento
 from app.schemas.query_params import QueryParams
@@ -12,3 +12,4 @@ class LancamentoFilterDto(QueryParams):
     tipo: Optional[TipoLancamento] = None
     finalidade_id: Optional[int] = None
     descricao: Optional[str] = None
+    exclude_ids: Optional[List[int]] = None

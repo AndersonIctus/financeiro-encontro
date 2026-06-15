@@ -61,6 +61,10 @@ class LancamentoRepository:
         if params.descricao:
             query = query.filter(Lancamento.descricao.ilike(f"%{params.descricao}%"))
 
+        # Excluir IDs já carregados (lazy load optimization)
+        if params.exclude_ids:
+            query = query.filter(~Lancamento.id.in_(params.exclude_ids))
+
         if params.limit > 1000 or params.limit <= 0:
             params.limit = 1000
 
@@ -89,6 +93,10 @@ class LancamentoRepository:
 
         if params.descricao:
             query = query.filter(Lancamento.descricao.ilike(f"%{params.descricao}%"))
+
+        # Excluir IDs já carregados (lazy load optimization)
+        if params.exclude_ids:
+            query = query.filter(~Lancamento.id.in_(params.exclude_ids))
 
         query = apply_sort(query, Lancamento, params.sort, SORT_FIELDS, DEFAULT_SORT)
 
