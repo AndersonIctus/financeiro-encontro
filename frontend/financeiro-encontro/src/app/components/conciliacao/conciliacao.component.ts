@@ -1,32 +1,105 @@
-import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+
+import { MaterialGlobalModule } from '../../shared/modules/material.imports.module';
+import { ToastService } from '../../shared/components/toast/toast.service';
+import { ConciliacaoService } from '../../services/conciliacao.service';
+import {
+  ConciliacaoUploadDialogComponent,
+  UploadDialogData,
+} from './conciliacao-upload-dialog/conciliacao-upload-dialog.component';
 
 @Component({
   selector: 'app-conciliacao',
   standalone: true,
-  imports: [MatIconModule],
-  template: `
-    <div class="coming-soon">
-      <mat-icon>sync_alt</mat-icon>
-      <h2>Conciliação</h2>
-      <p>Em breve implementado</p>
-    </div>
-  `,
-  styles: [`
-    .coming-soon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      min-height: 400px;
-      gap: 12px;
-      color: var(--mat-sys-on-surface-variant);
-
-      mat-icon { font-size: 64px; width: 64px; height: 64px; opacity: 0.4; }
-      h2 { margin: 0; font-size: 1.5rem; font-weight: 500; }
-      p  { margin: 0; font-size: 1rem; opacity: 0.7; }
-    }
-  `],
+  imports: [CommonModule, MaterialGlobalModule],
+  templateUrl: './conciliacao.component.html',
+  styleUrl:    './conciliacao.component.scss',
 })
-export class ConciliacaoComponent {}
+export class ConciliacaoComponent {
+  @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
+
+  uploading = false;
+  dragOver  = false;
+
+  constructor(
+    private conciliacaoService: ConciliacaoService,
+    private dialog: MatDialog,
+    private router: Router,
+    private toast: ToastService,
+  ) {}
+
+  irParaConciliar(): void {
+    this.router.navigate(['/conciliacao/conciliar']);
+  }
+
+  abrirSeletor(): void {
+    this.fileInputRef.nativeElement.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) this.upload(file);
+    input.value = '';
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver = false;
+
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    this.upload(file);
+  }
+
+  private upload(file: File): void {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      this.toast.warning({ message: 'Apenas arquivos .csv são aceitos.' });
+      return;
+    }
+
+    this.uploading = true;
+    this.conciliacaoService.upload(file).subscribe({
+      next: (resultado) => {
+        this.uploading = false;
+        this.abrirDialog(file.name, resultado);
+      },
+      error: (err) => {
+        this.uploading = false;
+        this.toast.error({ message: err?.error?.detail ?? 'Erro ao processar o arquivo.' });
+      },
+    });
+  }
+
+  private abrirDialog(nomeArquivo: string, resultado: { inseridos: number; duplicados: number; erros: number }): void {
+    this.dialog.open<ConciliacaoUploadDialogComponent, UploadDialogData>(
+      ConciliacaoUploadDialogComponent,
+      {
+        width: '440px',
+        disableClose: true,
+        data: {
+          nomeArquivo,
+          inseridos:  resultado.inseridos,
+          duplicados: resultado.duplicados,
+          erros:      resultado.erros,
+        },
+      },
+    );
+  }
+}

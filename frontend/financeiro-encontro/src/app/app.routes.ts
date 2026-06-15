@@ -35,7 +35,16 @@ export const routes: Routes = [
       },
       {
         path: 'conciliacao',
-        loadComponent: () => import('./components/conciliacao/conciliacao.component').then(m => m.ConciliacaoComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./components/conciliacao/conciliacao.component').then(m => m.ConciliacaoComponent),
+          },
+          {
+            path: 'conciliar',
+            loadComponent: () => import('./components/conciliacao/conciliar-lancamentos/conciliar-lancamentos.component').then(m => m.ConciliarLancamentosComponent),
+          },
+        ],
       },
       {
         path: 'arquivos',
