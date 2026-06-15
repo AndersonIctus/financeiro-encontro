@@ -1,6 +1,5 @@
 .conciliar-page {
   padding: 24px;
-  // max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -55,7 +54,6 @@
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
 }
 
 .card-wrapper {

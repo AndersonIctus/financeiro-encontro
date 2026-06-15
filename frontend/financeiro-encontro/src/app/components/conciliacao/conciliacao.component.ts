@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,6 +20,8 @@ import {
 })
 export class ConciliacaoComponent {
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
+
+  private cdr   = inject(ChangeDetectorRef);
 
   uploading = false;
   dragOver  = false;
@@ -79,10 +81,12 @@ export class ConciliacaoComponent {
       next: (resultado) => {
         this.uploading = false;
         this.abrirDialog(file.name, resultado);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.uploading = false;
         this.toast.error({ message: err?.error?.detail ?? 'Erro ao processar o arquivo.' });
+        this.cdr.detectChanges();
       },
     });
   }

@@ -6,7 +6,7 @@
       <h1 class="page-title">Conciliação</h1>
       <p class="page-subtitle">Importe o extrato do Banco Inter para registrar lançamentos</p>
     </div>
-    <button mat-stroked-button color="primary" (click)="irParaConciliar()">
+    <button mat-stroked-button color="primary" class="btn" (click)="irParaConciliar()">
       <mat-icon>sync_alt</mat-icon>
       Conciliar Lançamentos
     </button>
@@ -42,7 +42,7 @@
           {{ dragOver ? 'Solte o arquivo aqui' : 'Arraste seu arquivo CSV aqui' }}
         </p>
         <p class="drop-sub">ou</p>
-        <button mat-flat-button color="primary" (click)="$event.stopPropagation(); abrirSeletor()">
+        <button mat-flat-button color="primary" class="btn" (click)="$event.stopPropagation(); abrirSeletor()">
           <mat-icon>folder_open</mat-icon>
           Selecionar arquivo
         </button>
