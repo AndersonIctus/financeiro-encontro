@@ -5,4 +5,5 @@ export interface LancamentoFilterDto {
   tipo?:          string;
   finalidade_id?: number;
   descricao?:     string;
+  exclude_ids?:   number[];  // IDs já carregados (lazy load optimization)
 }

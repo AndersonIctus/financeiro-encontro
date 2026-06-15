@@ -42,10 +42,7 @@
   @if (!loading) {
     <div class="cards-grid">
       @for (item of items; track item.id) {
-        <div
-          [@cardLeave]="item._state"
-          (@cardLeave.done)="onLeaveDone($event, item)"
-          class="card-wrapper">
+        <div class="card-wrapper" [class.card-leaving]="item._leaving">
           <app-conciliacao-card
             [lancamento]="item"
             [finalidades]="finalidades"
@@ -67,7 +64,7 @@
   @if (allLoaded && !isEmpty && !loading) {
     <div class="all-loaded">
       <mat-icon>check</mat-icon>
-      <span>Todos os {{ visibleItems.length }} lançamentos carregados</span>
+      <span>Todos os {{ visibleCount }} lançamentos carregados</span>
     </div>
   }
 

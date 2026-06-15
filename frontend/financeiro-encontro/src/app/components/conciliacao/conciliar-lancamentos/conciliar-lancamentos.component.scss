@@ -54,10 +54,28 @@
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  // gap: 16px;
+  align-items: start;
 }
 
+/* ── animação de saída do card ── */
 .card-wrapper {
   overflow: hidden;
+  max-height: 600px;
+  opacity: 1;
+  transition:
+    max-height 350ms ease-in-out,
+    opacity    200ms ease-in-out,
+    margin     350ms ease-in-out,
+    padding    350ms ease-in-out;
+
+  &.card-leaving {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+  }
 }
 
 .loading-more {

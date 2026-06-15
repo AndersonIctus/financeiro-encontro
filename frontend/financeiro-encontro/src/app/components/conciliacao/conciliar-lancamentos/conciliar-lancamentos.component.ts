@@ -8,15 +8,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import {
-  animate,
-  AnimationEvent,
-  keyframes,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -28,8 +19,12 @@ import { Lancamento } from '../../../models/lancamento.model';
 import { Finalidade } from '../../../models/finalidade.model';
 import { StatusLancamento } from '../../../models/constants/status-lancamento';
 
+const ANIMATION_DURATION_MS = 350;
+const LAZY_THRESHOLD        = 10;
+const PAGE_SIZE             = 20;
+
 interface CardItem extends Lancamento {
-  _state: 'visible' | 'leaving';
+  _leaving: boolean;
 }
 
 @Component({
@@ -44,23 +39,6 @@ interface CardItem extends Lancamento {
   ],
   templateUrl: './conciliar-lancamentos.component.html',
   styleUrl: './conciliar-lancamentos.component.scss',
-  animations: [
-    trigger('cardLeave', [
-      state('visible', style({ opacity: 1 })),
-      state('leaving', style({ opacity: 0 })),
-      transition('visible => leaving', [
-        style({ overflow: 'hidden' }),
-        animate(
-          '350ms ease-in-out',
-          keyframes([
-            style({ opacity: 1, height: '*', marginBottom: '*', paddingTop: '*', paddingBottom: '*', offset: 0 }),
-            style({ opacity: 0, height: '*', marginBottom: '*', paddingTop: '*', paddingBottom: '*', offset: 0.4 }),
-            style({ opacity: 0, height: '0px', marginBottom: '0px', paddingTop: '0px', paddingBottom: '0px', offset: 1 }),
-          ]),
-        ),
-      ]),
-    ]),
-  ],
 })
 export class ConciliarLancamentosComponent implements OnInit, OnDestroy {
   private lancamentoService = inject(LancamentoService);
@@ -111,28 +89,29 @@ export class ConciliarLancamentosComponent implements OnInit, OnDestroy {
     this.loadBatch(true);
   }
 
-  loadBatch(initial = false): void {
+  loadBatch(initial = false, pageAppend = 20): void {
     if (initial) {
       this.loading = true;
     } else {
       this.loadingMore = true;
     }
 
-    const skip = this.visibleItems.length;
+    const excludeIds = this.items.map(i => i.id);
 
     this.lancamentoService
       .list(
         {
-          status:    StatusLancamento.NAO_CONCILIADO,
+          status: StatusLancamento.NAO_CONCILIADO,
+          exclude_ids: excludeIds,
           ...(this.search ? { descricao: this.search } : {}),
         },
-        { skip, limit: 20 },
+        { skip: 0, limit: pageAppend },
       )
       .subscribe({
         next: (page) => {
-          const newItems: CardItem[] = page.items.map(l => ({ ...l, _state: 'visible' }));
-          this.items = [...this.visibleItems, ...newItems];
-          if (page.items.length < 20) this.allLoaded = true;
+          const newItems: CardItem[] = page.items.map(l => ({ ...l, _leaving: false }));
+          this.items       = [...this.items, ...newItems];
+          this.allLoaded   = page.total < PAGE_SIZE;
           this.loading     = false;
           this.loadingMore = false;
           this.cdr.detectChanges();
@@ -146,21 +125,21 @@ export class ConciliarLancamentosComponent implements OnInit, OnDestroy {
   }
 
   onConciliado(item: CardItem): void {
-    item._state = 'leaving';
-  }
-
-  onLeaveDone(event: AnimationEvent, item: CardItem): void {
-    if (event.toState !== 'leaving') return;
-    this.items = this.items.filter(i => i.id !== item.id);
+    item._leaving = true;
     this.cdr.detectChanges();
 
-    if (this.visibleItems.length < 15 && !this.allLoaded && !this.loadingMore) {
-      this.loadBatch();
-    }
+    setTimeout(() => {
+      this.items = this.items.filter(i => i.id !== item.id);
+
+      if (this.visibleCount < LAZY_THRESHOLD && !this.allLoaded && !this.loadingMore) {
+        this.loadBatch(false, 10);
+      }
+      this.cdr.detectChanges();
+    }, ANIMATION_DURATION_MS);
   }
 
-  get visibleItems(): CardItem[] {
-    return this.items.filter(i => i._state === 'visible');
+  get visibleCount(): number {
+    return this.items.filter(i => !i._leaving).length;
   }
 
   get isEmpty(): boolean {
