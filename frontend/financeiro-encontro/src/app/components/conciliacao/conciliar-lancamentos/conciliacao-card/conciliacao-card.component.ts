@@ -72,4 +72,12 @@ export class ConciliacaoCardComponent implements OnInit {
     return FormaPagamento.opcoesFormaPagamento.find(f => f.value === this.lancamento.forma_pagamento)?.name
       ?? this.lancamento.forma_pagamento;
   }
+
+  getDescricaoLabel(): string {
+    if (this.lancamento.descricao.length > 40) {
+      return this.lancamento.descricao.substring(0, 37) + '...';
+    }
+
+    return this.lancamento.descricao;
+  }
 }

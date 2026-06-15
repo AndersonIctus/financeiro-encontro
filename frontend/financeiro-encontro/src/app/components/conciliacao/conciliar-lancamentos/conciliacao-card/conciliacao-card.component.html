@@ -8,9 +8,15 @@
       <span class="chip chip-forma">{{ getFormaPagamentoLabel() }}</span>
     </div>
 
+    <!-- data -->
+    <div class="card-data">
+      <mat-icon>calendar_today</mat-icon>
+      <span>{{ lancamento.data_pagamento | date: 'dd/MM/yyyy' }}</span>
+    </div>
+
     <!-- descrição e valor -->
     <div class="card-header-info">
-      <span class="descricao">{{ lancamento.descricao }}</span>
+      <span class="descricao">{{ getDescricaoLabel() }}</span>
       <span
         class="valor"
         [ngClass]="lancamento.tipo === TipoLancamento.RECEITA ? 'valor-receita' : 'valor-despesa'"
@@ -18,18 +24,6 @@
         {{ lancamento.valor | currencyBR }}
       </span>
     </div>
-
-    <div class="card-data">
-      <mat-icon>calendar_today</mat-icon>
-      <span>{{ lancamento.data_pagamento | date: 'dd/MM/yyyy' }}</span>
-    </div>
-
-    @if (lancamento.observacao) {
-      <div class="card-obs">
-        <mat-icon>notes</mat-icon>
-        <span>{{ lancamento.observacao }}</span>
-      </div>
-    }
 
     <mat-divider class="divider"></mat-divider>
 
