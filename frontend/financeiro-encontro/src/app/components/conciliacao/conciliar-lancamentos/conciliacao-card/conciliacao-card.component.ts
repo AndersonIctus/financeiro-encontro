@@ -37,10 +37,15 @@ export class ConciliacaoCardComponent implements OnInit {
     private errorHandler: ErrorHandlerService,
   ) {}
 
+  get finalidadesFiltradas(): Finalidade[] {
+    return this.finalidades.filter(f => f.tipo === this.lancamento.tipo);
+  }
+
   ngOnInit(): void {
-    this.selectedFinalidadeId =
-      this.lancamento.sugestao_finalidade?.id ??
-      (this.finalidades[0]?.id ?? null);
+    const filtered    = this.finalidadesFiltradas;
+    const suggestionId = this.lancamento.sugestao_finalidade?.id ?? null;
+    const isValid     = filtered.some(f => f.id === suggestionId);
+    this.selectedFinalidadeId = isValid ? suggestionId : (filtered[0]?.id ?? null);
   }
 
   conciliar(): void {

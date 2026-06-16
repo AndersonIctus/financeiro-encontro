@@ -42,9 +42,14 @@ export class LancamentosFormComponent implements OnInit {
   lancamentoId: number | null = null;
   lancamento: Lancamento | null = null;
 
-  finalidades: Finalidade[] = [];
-  tipoOpcoes = TipoLancamento.opcoesTipo;
+  finalidades: Finalidade[]          = [];
+  tipoOpcoes          = TipoLancamento.opcoesTipo;
   formaPagamentoOpcoes = FormaPagamento.opcoesFormaPagamento;
+
+  get finalidadesFiltradas(): Finalidade[] {
+    const tipo = this.form?.get('tipo')?.value;
+    return tipo ? this.finalidades.filter(f => f.tipo === tipo) : this.finalidades;
+  }
 
   readonly StatusLancamento = StatusLancamento;
 
@@ -77,12 +82,22 @@ export class LancamentosFormComponent implements OnInit {
     this.finalidadeService.listAll().subscribe({
       next: (data) => {
         this.finalidades = data;
-
-        if (this.finalidades.length > 0) {
-          this.form.get('finalidade_id')?.setValue(this.finalidades[0].id);
-        }
+        this.syncFinalidadeByTipo();
       },
     });
+
+    this.form.get('tipo')?.valueChanges.subscribe(() => {
+      this.syncFinalidadeByTipo();
+    });
+  }
+
+  private syncFinalidadeByTipo(): void {
+    const filtered   = this.finalidadesFiltradas;
+    const currentId  = this.form.get('finalidade_id')?.value;
+    const isStillValid = filtered.some(f => f.id === currentId);
+    if (!isStillValid) {
+      this.form.get('finalidade_id')?.setValue(filtered[0]?.id ?? null);
+    }
   }
 
   private loadValues(id: number): void {

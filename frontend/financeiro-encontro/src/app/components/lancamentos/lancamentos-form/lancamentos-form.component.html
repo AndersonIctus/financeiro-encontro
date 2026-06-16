@@ -110,7 +110,7 @@
         <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-4">
           <mat-label>Finalidade</mat-label>
           <mat-select formControlName="finalidade_id">
-            @for (f of finalidades; track f.id) {
+            @for (f of finalidadesFiltradas; track f.id) {
               <mat-option [value]="f.id">{{ f.nome }}</mat-option>
             }
           </mat-select>
