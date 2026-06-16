@@ -4,5 +4,4 @@ export interface ExtratoBancario {
   caminho_arquivo: string;
   tamanho_bytes:   number | null;
   processado_em:   string;
-  status:          string;
 }
