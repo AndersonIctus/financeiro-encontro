@@ -161,7 +161,12 @@ export class LancamentosFormComponent implements OnInit {
   }
 
   voltar(): void {
-    this.router.navigate(['/lancamentos']);
+    const returnUrl: string | undefined = window.history.state?.returnUrl;
+    if (returnUrl) {
+      this.router.navigateByUrl(returnUrl);
+    } else {
+      this.router.navigate(['/lancamentos']);
+    }
   }
 
   private buildPayload() {
