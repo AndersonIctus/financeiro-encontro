@@ -50,6 +50,28 @@ export const routes: Routes = [
         path: 'arquivos',
         loadComponent: () => import('./components/arquivos/arquivos.component').then(m => m.ArquivosComponent),
       },
+      {
+        path: 'administracao',
+        children: [
+          {
+            path: 'finalidades',
+            children: [
+              {
+                path: '',
+                loadComponent: () => import('./components/administracao/finalidades/finalidades.component').then(m => m.FinalidadesComponent),
+              },
+              {
+                path: 'novo',
+                loadComponent: () => import('./components/administracao/finalidades/finalidades-form/finalidades-form.component').then(m => m.FinalidadesFormComponent),
+              },
+              {
+                path: ':id/editar',
+                loadComponent: () => import('./components/administracao/finalidades/finalidades-form/finalidades-form.component').then(m => m.FinalidadesFormComponent),
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {

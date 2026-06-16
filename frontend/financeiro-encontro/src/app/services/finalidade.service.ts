@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AbstractService } from './abstract.service';
-import { Finalidade } from '../models/finalidade.model';
+import { Finalidade, FinalidadeCreate, FinalidadeUpdate } from '../models/finalidade.model';
 import { PageTemplate, PageRequest } from './util/PageTemplate';
 import { FinalidadeFilterDto } from './dto/finalidade-filter.dto';
 
@@ -26,5 +26,17 @@ export class FinalidadeService extends AbstractService<Finalidade> {
 
   buscarPorId(id: number): Observable<Finalidade> {
     return this.getById(id);
+  }
+
+  criar(data: FinalidadeCreate): Observable<Finalidade> {
+    return this.persist<Finalidade>(data);
+  }
+
+  editar(id: number, data: FinalidadeUpdate): Observable<Finalidade> {
+    return this.update<Finalidade>(data, id);
+  }
+
+  remover(id: number): Observable<null> {
+    return this.delete(id);
   }
 }

@@ -54,6 +54,12 @@ export class MainComponent implements OnInit{
         { label: 'Arquivos Enviados', icon: 'folder_open', route: '/arquivos' },
       ],
     },
+    {
+      title: 'Administração',
+      items: [
+        { label: 'Finalidades', icon: 'label', route: '/administracao/finalidades' },
+      ],
+    },
   ];
 
   get nomeExibido(): string {
