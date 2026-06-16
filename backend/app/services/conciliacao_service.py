@@ -12,21 +12,23 @@ class ConciliacaoService:
     
     @staticmethod
     def _sugerir_finalidade(dto) -> int | None:
-        descricao = dto.descricao.lower()
+        # descricao = dto.descricao.lower()
 
-        if "oferta" in descricao:
-            return 1
-
-        if "campanha" in descricao:
-            return 2
-
-        if "inscricao" in descricao:
-            return 3
+        if dto.valor == 120:
+            return 4 # valor inscrição de enccontreiro
+        
+        if dto.valor >= 200 and dto.valor <= 220:
+            return 3 # valor inscrição de encontrista
         
         if dto.tipo == "entrada":
-            return 1 # padrão retorna oferta para receitas
+            if dto.valor >= 10 and dto.valor <= 50:
+                return 2 # valores padrão de campanhas
+            if dto.valor > 50:
+                return 99 # retorna outros para valores acima de 50 em receitas
+            else:
+                return 1 # para todos os outros casos de receitas
         else:
-            return 4 # padrão retorna despesa geral para despesas
+            return 99 # padrão retorna outros para despesas
     
     @staticmethod
     def _to_lancamento_dict(dto):
