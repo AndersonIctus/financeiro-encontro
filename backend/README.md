@@ -259,6 +259,13 @@ Cada lançamento gera um hash SHA-256 a partir de `descricao_normalizada + valor
 
 Os comandos abaixo devem ser executados dentro da pasta `backend/` com o venv ativo.
 
+> A URL do banco é lida automaticamente da variável `DATABASE_URL` (via `alembic/env.py`). O `alembic.ini` não precisa ser editado.
+>
+> Ao rodar `alembic` diretamente no terminal (fora do `start-backend.sh`), carregue o `.env` antes:
+> ```bash
+> export $(grep -v '^#' .env | xargs) && alembic upgrade head
+> ```
+
 ### Aplicar todas as migrations pendentes
 
 ```bash
