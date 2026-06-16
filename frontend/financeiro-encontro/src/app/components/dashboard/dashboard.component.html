@@ -7,7 +7,6 @@
     <mat-card-content class="!pb-0">
       <form [formGroup]="formFilters" (ngSubmit)="buscar()" class="grid grid-cols-12 gap-x-4 items-start">
 
-        <!-- mobile: 1 por linha | md: 2 por linha | lg: 4 por linha -->
         <mat-form-field appearance="outline" floatLabel="always" class="col-span-12 md:col-span-6 lg:col-span-3">
           <mat-label>Data início</mat-label>
           <input matInput [matDatepicker]="pickerInicio" formControlName="data_inicio" placeholder="DD/MM/AAAA">
@@ -40,7 +39,6 @@
           </mat-select>
         </mat-form-field>
 
-        <!-- mobile: 1 por linha | md: lado a lado | lg: ⅓ cada com botão -->
         <app-multi-select class="col-span-12 md:col-span-6 lg:col-span-4"
           [items]="formasPagamento"
           [selectedIds]="formFilters.get('forma_pagamento')?.value || []"
@@ -55,7 +53,6 @@
           label="Finalidade">
         </app-multi-select>
 
-        <!-- mobile: linha inteira | lg: ⅓ alinhado à direita -->
         <div class="col-end-13 !pb-2 flex items-start justify-end">
           <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="filter-btn">
             <mat-icon>search</mat-icon>
@@ -73,16 +70,12 @@
       <mat-spinner diameter="40" />
     </div>
   } @else {
-    <!-- mobile: 1 por linha | md: 3 por linha | lg: 3 por linha -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
-      <!-- Receitas -->
       <mat-card class="dashboard__card dashboard__card--receita" appearance="outlined">
         <mat-card-content>
           <div class="flex items-center gap-4 py-1">
-            <div class="card-icon">
-              <mat-icon>trending_up</mat-icon>
-            </div>
+            <div class="card-icon"><mat-icon>trending_up</mat-icon></div>
             <div class="flex flex-col min-w-0">
               <span class="card-label">Receitas</span>
               <span class="card-value">
@@ -93,13 +86,10 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Despesas -->
       <mat-card class="dashboard__card dashboard__card--despesa" appearance="outlined">
         <mat-card-content>
           <div class="flex items-center gap-4 py-1">
-            <div class="card-icon">
-              <mat-icon>trending_down</mat-icon>
-            </div>
+            <div class="card-icon"><mat-icon>trending_down</mat-icon></div>
             <div class="flex flex-col min-w-0">
               <span class="card-label">Despesas</span>
               <span class="card-value">
@@ -110,13 +100,10 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Saldo -->
       <mat-card class="dashboard__card dashboard__card--saldo" appearance="outlined">
         <mat-card-content>
           <div class="flex items-center gap-4 py-1">
-            <div class="card-icon">
-              <mat-icon>account_balance_wallet</mat-icon>
-            </div>
+            <div class="card-icon"><mat-icon>account_balance_wallet</mat-icon></div>
             <div class="flex flex-col min-w-0">
               <span class="card-label">Saldo</span>
               <span class="card-value" [class.card-value--negative]="(totais?.saldo ?? 0) < 0">
@@ -129,5 +116,15 @@
 
     </div>
   }
+
+  <!-- ─── Gráficos de pizza ─────────────────────────────────────────────────── -->
+  <app-pizza-finalidade [filtros]="filtrosAtivos" tipo="RECEITA" />
+  <app-pizza-finalidade [filtros]="filtrosAtivos" tipo="DESPESA" />
+
+  <!-- ─── Barras mensais ───────────────────────────────────────────────────── -->
+  <app-barra-mensal [filtros]="filtrosAtivos" />
+
+  <!-- ─── Top 5 finalidades ────────────────────────────────────────────────── -->
+  <app-barra-top-finalidades [filtros]="filtrosAtivos" />
 
 </div>

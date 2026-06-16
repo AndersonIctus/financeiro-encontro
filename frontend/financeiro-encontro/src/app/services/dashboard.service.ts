@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AbstractService } from './abstract.service';
-import { DashboardTotais, DashboardPorDia, DashboardPorMes } from '../models/dashboard.model';
+import { DashboardTotais, DashboardPorDia, DashboardPorMes, DashboardPorFinalidade } from '../models/dashboard.model';
 import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 
 @Injectable({ providedIn: 'root' })
@@ -26,5 +26,10 @@ export class DashboardService extends AbstractService<DashboardTotais> {
   getPorMes(request: DashboardFilterDto): Observable<DashboardPorMes[]> {
     const params = Object.assign({}, request);
     return this.getCustom<DashboardPorMes[]>('/por-mes', { params });
+  }
+
+  getPorFinalidade(request: DashboardFilterDto): Observable<DashboardPorFinalidade[]> {
+    const params = Object.assign({}, request);
+    return this.getCustom<DashboardPorFinalidade[]>('/por-finalidade', { params });
   }
 }

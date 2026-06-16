@@ -14,12 +14,16 @@ import {
 } from '../../shared/components/multi-select/multi-select.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { FinalidadeService } from '../../services/finalidade.service';
+import { DashboardStateService } from '../../services/dashboard-state.service';
 import { DashboardTotais } from '../../models/dashboard.model';
 import { Finalidade } from '../../models/finalidade.model';
 import { DashboardFilterDto } from '../../services/dto/dashboard-filter.dto';
 import { TipoLancamento } from '../../models/constants/tipo-lancamento';
 import { StatusLancamento } from '../../models/constants/status-lancamento';
 import { FormaPagamento } from '../../models/constants/forma-pagamento';
+import { PizzaFinalidadeComponent } from './graphs/pizza-finalidade/pizza-finalidade.component';
+import { BarraMensalComponent } from './graphs/barra-mensal/barra-mensal.component';
+import { BarraTopFinalidadesComponent } from './graphs/barra-top-finalidades/barra-top-finalidades.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,6 +35,9 @@ import { FormaPagamento } from '../../models/constants/forma-pagamento';
     MaterialFormsModule,
     MaterialDatepickerModule,
     MultiSelectComponent,
+    PizzaFinalidadeComponent,
+    BarraMensalComponent,
+    BarraTopFinalidadesComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -39,6 +46,11 @@ export class DashboardComponent implements OnInit {
   formFilters: FormGroup;
   totais: DashboardTotais | null = null;
   loading = false;
+
+  filtrosAtivos: DashboardFilterDto = {
+    data_inicio: moment().startOf('year').format('YYYY-MM-DDT00:00:00'),
+    data_fim: moment().format('YYYY-MM-DDT23:59:59'),
+  };
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -51,6 +63,7 @@ export class DashboardComponent implements OnInit {
     private fb: FormBuilder,
     private dashboardService: DashboardService,
     private finalidadeService: FinalidadeService,
+    private stateService: DashboardStateService,
   ) {
     this.formFilters = this.fb.group({
       data_inicio: [moment().startOf('year')],
@@ -80,17 +93,45 @@ export class DashboardComponent implements OnInit {
       next: (data: Finalidade[]) => {
         this.finalidades = data.map((f) => ({
           id: f.id,
-          label: f.nome,
+          label: f.nome + (f.tipo === TipoLancamento.RECEITA ? ' (Receita)' : ' (Despesa)'),
         }));
-        this.buscar();
+        this.initializeDashboard();
       },
-      error: () => this.buscar(),
+      error: () => this.initializeDashboard(),
+    });
+  }
+
+  private initializeDashboard(): void {
+    const saved = this.stateService.filtrosAtivos;
+    if (saved) {
+      this.filtrosAtivos = saved;
+      this.loadTotais(saved);
+    } else {
+      this.buscar();
+    }
+  }
+
+  private loadTotais(filter: DashboardFilterDto): void {
+    this.loading = true;
+    this.dashboardService.getTotais(filter).subscribe({
+      next: (data) => {
+        this.totais = data;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
   buscar(): void {
     const filter = this.buildFilter();
+    this.filtrosAtivos = filter;
+    this.stateService.filtrosAtivos = filter;
     this.loading = true;
+
     this.dashboardService.getTotais(filter).subscribe({
       next: (data) => {
         this.totais = data;
