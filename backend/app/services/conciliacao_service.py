@@ -41,9 +41,9 @@ class ConciliacaoService:
         """Sugere a finalidade de DESPESA com base no lançamento. Escolhe por heurística da descrição."""
         label = dto.descricao.lower() if dto.descricao else ""
         
-        if ["camisa"] in label:
+        if "camisa" in label:
             return _DESPESA_CAMISAS
-        if ["atacarejo", "atacadão", "atacadao"] in label:
+        if any(w in label for w in ["atacarejo", "atacadão", "atacadao", "supermercado", "mercado", "compras"]):
             return _DESPESA_COMPRAS
         
         return _DESPESA_OUTROS
