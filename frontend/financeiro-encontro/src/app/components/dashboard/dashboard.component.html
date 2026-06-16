@@ -73,8 +73,8 @@
       <mat-spinner diameter="40" />
     </div>
   } @else {
-    <!-- mobile: 1 por linha | md: 2 por linha | lg: 4 por linha -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- mobile: 1 por linha | md: 3 por linha | lg: 3 por linha -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
       <!-- Receitas -->
       <mat-card class="dashboard__card dashboard__card--receita" appearance="outlined">
@@ -121,23 +121,6 @@
               <span class="card-label">Saldo</span>
               <span class="card-value" [class.card-value--negative]="(totais?.saldo ?? 0) < 0">
                 {{ (totais?.saldo ?? 0) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-              </span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Quantidade -->
-      <mat-card class="dashboard__card dashboard__card--quantidade" appearance="outlined">
-        <mat-card-content>
-          <div class="flex items-center gap-4 py-1">
-            <div class="card-icon">
-              <mat-icon>receipt_long</mat-icon>
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span class="card-label">Lançamentos</span>
-              <span class="card-value card-value--count">
-                {{ totais?.quantidade ?? 0 }}
               </span>
             </div>
           </div>

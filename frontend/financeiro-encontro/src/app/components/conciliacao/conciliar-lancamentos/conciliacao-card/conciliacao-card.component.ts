@@ -74,8 +74,8 @@ export class ConciliacaoCardComponent implements OnInit {
   }
 
   getDescricaoLabel(): string {
-    if (this.lancamento.descricao.length > 40) {
-      return this.lancamento.descricao.substring(0, 37) + '...';
+    if (this.lancamento.descricao.length > 35) {
+      return this.lancamento.descricao.substring(0, 32) + '...';
     }
 
     return this.lancamento.descricao;
