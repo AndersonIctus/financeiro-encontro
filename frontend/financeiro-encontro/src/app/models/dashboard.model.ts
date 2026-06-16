@@ -18,3 +18,10 @@ export interface DashboardPorMes {
   total_despesas: number;
   saldo:          number;
 }
+
+export interface DashboardPorFinalidade {
+  finalidade_id: number | null;
+  nome:          string;
+  total_valor:   number;
+  quantidade:    number;
+}

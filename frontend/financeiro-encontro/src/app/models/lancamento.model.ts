@@ -9,6 +9,7 @@ export interface Lancamento {
   status:               string;
   data_pagamento:       string;
   finalidade_id:        number | null;
+  finalidade:           Finalidade | null;
   sugestao_finalidade:  Finalidade | null;
   observacao:           string | null;
   criado_em:            string;
