@@ -20,8 +20,10 @@ def _despesas_expr():
 
 
 def _apply_filters(query, params):
-    query = query.filter(Lancamento.data_pagamento >= params.data_inicio)
-    query = query.filter(Lancamento.data_pagamento <= params.data_fim)
+    if params.data_inicio:
+        query = query.filter(Lancamento.data_pagamento >= params.data_inicio)
+    if params.data_fim:
+        query = query.filter(Lancamento.data_pagamento <= params.data_fim)
 
     if params.forma_pagamento:
         query = query.filter(Lancamento.forma_pagamento.in_(params.forma_pagamento))
