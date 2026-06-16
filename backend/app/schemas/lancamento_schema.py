@@ -38,8 +38,9 @@ class LancamentoUpdate(BaseModel):
 class LancamentoResponse(LancamentoBase):
     id: int
     status: StatusLancamento
+    finalidade: Optional[FinalidadeResponse] = None
     sugestao_finalidade: Optional[FinalidadeResponse] = None
-    
+
     criado_em: datetime
     atualizado_em: Optional[datetime] = None
 

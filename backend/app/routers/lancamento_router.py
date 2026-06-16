@@ -4,6 +4,7 @@ from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
+from app.models.enums import FormaPagamento
 from app.schemas.lancamento_filter_dto import LancamentoFilterDto
 from app.schemas.lancamento_schema import (
     LancamentoConciliarRequest,
@@ -25,18 +26,26 @@ def create(data: LancamentoCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=Page[LancamentoResponse])
 def list_lancamentos(
     params: LancamentoFilterDto = Depends(),
+    finalidade_ids: Optional[List[int]] = Query(default=None),
+    forma_pagamento: Optional[List[FormaPagamento]] = Query(default=None),
     exclude_ids: Optional[List[int]] = Query(default=None),
     db: Session = Depends(get_db),
 ):
     params.exclude_ids = exclude_ids
+    params.finalidade_ids = finalidade_ids
+    params.forma_pagamento = forma_pagamento
     return LancamentoService.list(db, params)
 
 
 @router.get("/all", response_model=List[LancamentoResponse])
 def list_all(
     params: LancamentoFilterDto = Depends(),
+    finalidade_ids: Optional[List[int]] = Query(default=None),
+    forma_pagamento: Optional[List[FormaPagamento]] = Query(default=None),
     db: Session = Depends(get_db),
 ):
+    params.finalidade_ids = finalidade_ids
+    params.forma_pagamento = forma_pagamento
     return LancamentoService.list_all(db, params)
 
 

@@ -2,6 +2,7 @@ from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
 from app.models.enums import TipoLancamento
+from app.models.finalidade import Finalidade
 from app.models.lancamento import Lancamento
 
 
@@ -70,3 +71,22 @@ class DashboardRepository:
             _despesas_expr().label("total_despesas"),
         ).group_by(mes_col).order_by(mes_col)
         return _apply_filters(query, params).all()
+
+    @staticmethod
+    def get_por_finalidade(db: Session, params):
+        nome_col = func.coalesce(Finalidade.nome, "Não Conciliado").label("nome")
+        total_col = func.sum(Lancamento.valor).label("total_valor")
+        count_col = func.count(Lancamento.id).label("quantidade")
+
+        query = db.query(
+            Lancamento.finalidade_id,
+            nome_col,
+            total_col,
+            count_col,
+        ).outerjoin(Finalidade, Lancamento.finalidade_id == Finalidade.id)
+
+        query = _apply_filters(query, params)
+        query = query.group_by(Lancamento.finalidade_id, Finalidade.nome)
+        query = query.order_by(func.sum(Lancamento.valor).desc())
+
+        return query.all()

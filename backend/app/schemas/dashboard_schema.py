@@ -1,5 +1,6 @@
+from typing import Optional
+
 from pydantic import BaseModel
-from typing import List
 
 
 class TotaisResponse(BaseModel):
@@ -21,3 +22,10 @@ class PorMesItem(BaseModel):
     total_receitas: float
     total_despesas: float
     saldo: float
+
+
+class PorFinalidadeItem(BaseModel):
+    finalidade_id: Optional[int]
+    nome: str
+    total_valor: float
+    quantidade: int

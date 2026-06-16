@@ -42,3 +42,16 @@ class DashboardService:
             }
             for row in rows
         ]
+
+    @staticmethod
+    def get_por_finalidade(db: Session, params):
+        rows = DashboardRepository.get_por_finalidade(db, params)
+        return [
+            {
+                "finalidade_id": row.finalidade_id,
+                "nome": row.nome or "Não Conciliado",
+                "total_valor": float(row.total_valor),
+                "quantidade": row.quantidade,
+            }
+            for row in rows
+        ]

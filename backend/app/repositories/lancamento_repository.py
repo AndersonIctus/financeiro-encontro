@@ -55,8 +55,13 @@ class LancamentoRepository:
         if params.tipo:
             query = query.filter(Lancamento.tipo == params.tipo)
 
-        if params.finalidade_id:
+        if getattr(params, 'finalidade_ids', None):
+            query = query.filter(Lancamento.finalidade_id.in_(params.finalidade_ids))
+        elif params.finalidade_id is not None:
             query = query.filter(Lancamento.finalidade_id == params.finalidade_id)
+
+        if getattr(params, 'forma_pagamento', None):
+            query = query.filter(Lancamento.forma_pagamento.in_(params.forma_pagamento))
 
         if params.descricao:
             query = query.filter(Lancamento.descricao.ilike(f"%{params.descricao}%"))
@@ -69,9 +74,9 @@ class LancamentoRepository:
             params.limit = 1000
 
         query = apply_sort(query, Lancamento, params.sort, SORT_FIELDS, DEFAULT_SORT)
-        
+
         return query.offset(params.skip).limit(params.limit).all()
-    
+
     @staticmethod
     def list_with_count(db: Session, params):
         query = db.query(Lancamento)
@@ -88,8 +93,13 @@ class LancamentoRepository:
         if params.tipo:
             query = query.filter(Lancamento.tipo == params.tipo)
 
-        if params.finalidade_id:
+        if getattr(params, 'finalidade_ids', None):
+            query = query.filter(Lancamento.finalidade_id.in_(params.finalidade_ids))
+        elif params.finalidade_id is not None:
             query = query.filter(Lancamento.finalidade_id == params.finalidade_id)
+
+        if getattr(params, 'forma_pagamento', None):
+            query = query.filter(Lancamento.forma_pagamento.in_(params.forma_pagamento))
 
         if params.descricao:
             query = query.filter(Lancamento.descricao.ilike(f"%{params.descricao}%"))
