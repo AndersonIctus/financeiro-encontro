@@ -174,6 +174,9 @@ O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (con
 - `data_inicio` / `data_fim` — intervalo de data de pagamento
 - `status` — `CONCILIADO` ou `NAO_CONCILIADO`
 - `tipo` — `RECEITA` ou `DESPESA`
+- `finalidade_id` — ID de uma finalidade específica
+- `forma_pagamento[]` — `PIX`, `DINHEIRO`, `CARTAO_CREDITO`, `CARTAO_DEBITO`
+- `descricao` — busca parcial na descrição
 - `skip` / `limit` — paginação
 - `sort` — ordenação (ex: `data_pagamento:desc`)
 
@@ -183,11 +186,16 @@ O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (con
 
 | Método | Rota | Descrição |
 |---|---|---|
-| GET | `/finalidades/` | Listar com paginação |
+| GET | `/finalidades/` | Listar com paginação e filtros |
 | GET | `/finalidades/all` | Listar todas sem paginação |
 | GET | `/finalidades/{id}` | Buscar por ID |
+| POST | `/finalidades/` | Criar finalidade |
+| PUT | `/finalidades/{id}` | Atualizar finalidade |
+| DELETE | `/finalidades/{id}` | Excluir finalidade |
 
-> Finalidades são gerenciadas via seeds. Não há endpoints de criação ou edição.
+**Filtros disponíveis no GET `/finalidades/`:**
+- `nome` — filtro por nome (parcial)
+- `tipo` — `RECEITA` ou `DESPESA`
 
 ---
 
@@ -203,6 +211,24 @@ O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (con
 **Filtros disponíveis:**
 - `nome_arquivo` — filtro por nome do arquivo
 - `processado_em_inicio` / `processado_em_fim` — intervalo de data de processamento
+
+---
+
+### Dashboard `/dashboard`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/dashboard/totais` | Totais agregados (receitas, despesas, saldo, quantidade) |
+| GET | `/dashboard/por-dia` | Breakdown dia a dia para um período |
+| GET | `/dashboard/por-mes` | Breakdown mês a mês para um período |
+| GET | `/dashboard/por-finalidade` | Totais agrupados por finalidade |
+
+**Filtros disponíveis (compartilhados por todos os endpoints):**
+- `data_inicio` / `data_fim` — intervalo de datas (padrão: hoje → hoje+30d)
+- `forma_pagamento[]` — `PIX`, `DINHEIRO`, `CARTAO_CREDITO`, `CARTAO_DEBITO`
+- `finalidade_id[]` — lista de IDs de finalidade
+- `tipo` — `RECEITA` ou `DESPESA`
+- `status` — `CONCILIADO` ou `NAO_CONCILIADO`
 
 ---
 
@@ -225,7 +251,7 @@ O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (con
 
 ### Deduplicação
 
-Cada lançamento gera um hash MD5 a partir de `data_pagamento + valor + descricao`. Reenviar o mesmo CSV não duplica registros.
+Cada lançamento gera um hash SHA-256 a partir de `descricao_normalizada + valor + data_pagamento`. Reenviar o mesmo CSV não duplica registros.
 
 ---
 

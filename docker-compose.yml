@@ -28,6 +28,7 @@ services:
       JWT_ALGORITHM: ${JWT_ALGORITHM}
       JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES}
       APP_PORT: ${APP_PORT:-8000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
     volumes:
       - uploads_data:${UPLOAD_FOLDER:-/app/uploads}
     depends_on:
@@ -37,21 +38,15 @@ services:
       - "${APP_PORT:-8000}:${APP_PORT:-8000}"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend/financeiro-encontro
+      args:
+        API_URL: ${API_URL:-http://localhost:8000}
     container_name: financeiro_encontro_frontend
-    depends_on:
-      - backend
-
-  nginx:
-    image: nginx:alpine
-    container_name: financeiro_encontro_nginx
     ports:
       - "80:80"
-    volumes:
-      - ./infra/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - backend
-      - frontend
 
 volumes:
   postgres_data:

@@ -60,7 +60,7 @@ utils/        # Shared helpers (hash_utils, sort_utils)
 
 **Key domain models:**
 - `Lancamento`: Financial transaction (RECEITA/DESPESA), with payment form (PIX/DINHEIRO/CARTAO_*), status (CONCILIADO/NAO_CONCILIADO), and a deduplication `hash_transacao`
-- `Finalidade`: Category/purpose for a transaction — read-only via API, managed via seeds
+- `Finalidade`: Category/purpose for a transaction — full CRUD via API; seeds provide initial data at startup
 - `ExtratoBancario`: Imported bank statement file record
 - `Usuario`: Authenticated user — read-only via API, managed via seeds
 
@@ -80,6 +80,7 @@ After import, records are `NAO_CONCILIADO`. Manual reconciliation via `PATCH /la
 `GET /dashboard/totais` — aggregated totals (receitas, despesas, saldo, quantidade).
 `GET /dashboard/por-dia` — day-by-day breakdown for a period.
 `GET /dashboard/por-mes` — month-by-month breakdown for a period.
+`GET /dashboard/por-finalidade` — totals grouped by finalidade (id, nome, total_valor, quantidade).
 All share the same filter DTO: `data_inicio`, `data_fim` (defaults: today → today+30d), `forma_pagamento[]`, `finalidade_id[]`, `tipo`, `status`.
 
 ### Frontend Structure (`frontend/financeiro-encontro/src/app/`)
@@ -108,3 +109,4 @@ Frontend communicates with backend at `http://localhost:{APP_PORT}` in developme
 | `JWT_ALGORITHM` | `HS256` | JWT algorithm |
 | `JWT_EXPIRE_MINUTES` | `480` | Token expiry (8 hours) |
 | `SQL_ECHO` | `false` | Log all SQL queries to console — enable in development only |
+| `CORS_ORIGINS` | `http://localhost:4200` | Allowed CORS origins (comma-separated) |

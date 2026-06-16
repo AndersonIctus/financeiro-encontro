@@ -9,6 +9,7 @@ Frontend do sistema **Financeiro Encontro**, interface web para gerenciamento fi
 - Angular 21 (standalone components)
 - TypeScript 5.9 (strict mode)
 - SCSS
+- Chart.js 4 + ng2-charts (gráficos do dashboard)
 - Moment.js
 - Vitest
 
@@ -37,6 +38,7 @@ npm start        # ng serve em http://localhost:4200
 | `npm start` | Servidor de desenvolvimento em `:4200` |
 | `npm run build` | Build de produção em `dist/` |
 | `npm test` | Testes unitários com Vitest |
+| `npm run test:watch` | Testes em modo watch (Vitest) |
 
 ---
 
@@ -50,12 +52,38 @@ src/
 ├── app/
 │   ├── models/                 # Interfaces TypeScript (espelham o backend)
 │   ├── services/               # Serviços HTTP (extendem AbstractService)
+│   │   ├── abstract.service.ts # Base genérica com paginação e filtros
+│   │   ├── auth.service.ts
+│   │   ├── lancamento.service.ts
+│   │   ├── finalidade.service.ts
+│   │   ├── extrato-bancario.service.ts
+│   │   ├── conciliacao.service.ts
+│   │   ├── dashboard.service.ts
+│   │   ├── dashboard-state.service.ts  # Estado compartilhado do dashboard
+│   │   ├── dto/                # DTOs de filtro para cada endpoint
 │   │   └── util/               # Utilitários (PageTemplate)
 │   ├── general/
 │   │   └── auth/               # Auth interceptor e guard JWT
 │   └── components/             # Componentes por tela (lazy loaded)
 │       ├── login/
-│       └── dashboard/
+│       ├── main/               # Shell principal com navegação lateral
+│       ├── dashboard/
+│       │   └── graphs/         # Gráficos Chart.js
+│       │       ├── barra-mensal/
+│       │       ├── barra-top-finalidades/
+│       │       └── pizza-finalidade/
+│       │           └── lista-lancamentos-graph/
+│       ├── lancamentos/
+│       │   └── lancamentos-form/
+│       ├── conciliacao/
+│       │   ├── conciliacao-upload-dialog/
+│       │   └── conciliar-lancamentos/
+│       │       └── conciliacao-card/
+│       ├── arquivos/           # Listagem de extratos importados
+│       ├── administracao/
+│       │   └── finalidades/
+│       │       └── finalidades-form/
+│       └── not-found/
 └── styles.scss                 # Estilos globais
 ```
 
