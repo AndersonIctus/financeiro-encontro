@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from app.models.extrato_bancario import ExtratoBancario
 from app.utils.sort_utils import apply_sort
 
@@ -27,8 +26,7 @@ class ExtratoBancarioRepository:
     def _apply_filters(query, params):
         if params.nome_arquivo:
             query = query.filter(
-                func.lower(ExtratoBancario.nome_arquivo)
-                .startswith(params.nome_arquivo.lower())
+                ExtratoBancario.nome_arquivo.ilike(f"%{params.nome_arquivo}%")
             )
 
         # 🔥 RANGE FILTER (profissional)
