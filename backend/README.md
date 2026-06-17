@@ -8,6 +8,8 @@ Este serviço fornece uma API REST para controle de:
 - Formas de pagamento (PIX, dinheiro, cartão)
 - Finalidades (oferta, campanha, inscrição)
 - Importação e conciliação de extratos bancários via CSV
+- Geração de relatórios PDF (Livro Caixa e Resumo Geral)
+- CRUD de usuários com perfis de acesso (ADMINISTRADOR, CONCILIADOR, REPORTER)
 
 ---
 
@@ -110,7 +112,6 @@ cp .env.example .env
 | Variável | Descrição | Padrão | Obrigatória |
 |---|---|---|---|
 | `DATABASE_URL` | URL de conexão com o banco | `postgresql://...@localhost:5432/financeiro_encontro` | Sim |
-| `UPLOAD_FOLDER` | Pasta onde os CSVs são salvos | `./uploads` | Não |
 | `APP_PORT` | Porta em que o servidor sobe | `8000` | Não |
 | `JWT_SECRET` | Chave secreta para assinar os tokens | `changeme-insecure-secret` | **Sim em produção** |
 | `JWT_ALGORITHM` | Algoritmo de assinatura JWT | `HS256` | Não |
@@ -153,6 +154,23 @@ O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (con
 |---|---|---|---|
 | POST | `/auth/login` | Gera token JWT | Sim |
 | GET | `/auth/me` | Retorna usuário autenticado | Não |
+
+---
+
+## Perfis de Acesso (RBAC)
+
+O campo `perfil` do usuário controla o que cada um pode ver e fazer.
+
+| Perfil | Descrição |
+|---|---|
+| `ADMINISTRADOR` | Acesso total — lançamentos, conciliação, arquivos, finalidades, usuários e relatórios |
+| `CONCILIADOR` | Acesso financeiro — lançamentos, conciliação e arquivos. Sem telas de administração |
+| `REPORTER` | Somente Dashboard (sem navegar para lançamentos) e Relatórios |
+
+Regras de negócio no CRUD de usuários:
+- O usuário de ID `1` (administrador principal) **nunca pode ser excluído**
+- Nenhum usuário pode **excluir a si mesmo**
+- Usuários são gerenciados via `POST/PUT/DELETE /usuarios` (requer autenticação)
 
 ---
 
@@ -236,7 +254,34 @@ O token é obtido via `POST /auth/login`. Por padrão expira em **8 horas** (con
 
 | Método | Rota | Descrição |
 |---|---|---|
-| POST | `/conciliacao/upload` | Upload e processamento de CSV bancário |
+| POST | `/conciliacao/upload` | Upload e processamento de CSV bancário (limite: 3 MB) |
+
+---
+
+### Usuários `/usuarios`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/usuarios/` | Listar usuários |
+| GET | `/usuarios/{id}` | Buscar por ID |
+| POST | `/usuarios/` | Criar usuário |
+| PUT | `/usuarios/{id}` | Atualizar usuário |
+| DELETE | `/usuarios/{id}` | Excluir usuário (restrições: id=1 e self) |
+
+**Campos:** `nome`, `email`, `senha` (hash bcrypt), `ativo`, `perfil` (`ADMINISTRADOR` \| `CONCILIADOR` \| `REPORTER`).
+
+---
+
+### Relatórios `/relatorios`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/relatorios/livro-caixa` | PDF contábil com todas as entradas, saídas e saldo acumulado |
+| GET | `/relatorios/resumo-geral` | PDF com tabelas pivot de Receitas e Despesas por forma de pagamento e finalidade, com linha de saldo |
+
+**Parâmetros comuns:** `data_inicio` (YYYY-MM-DD) e `data_fim` (YYYY-MM-DD).
+
+> O relatório **Resumo Geral** agrupa as finalidades em categorias fixas. Os IDs e nomes das finalidades padrão (`seed_finalidade.py`) não podem ser alterados sem também atualizar `relatorio_service.py`.
 
 ---
 
@@ -319,4 +364,3 @@ docker compose -f docker-compose-db.yml up -d
 ## Próximos passos
 
 - Suporte a outros bancos no parser de CSV (Itaú, Bradesco, Santander)
-- Deploy em nuvem (banco de dados + backend + frontend)

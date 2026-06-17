@@ -8,9 +8,23 @@ Sistema web para gerenciamento financeiro de encontros da igreja, permitindo con
 
 - Registro de receitas e despesas (PIX, dinheiro, cartão)
 - Organização por finalidades (ofertas, campanhas, inscrições)
-- Importação e conciliação de extratos bancários (Banco Inter)
+- Importação e conciliação de extratos bancários (Banco Inter — limite 3 MB)
 - Dashboard financeiro com totais, por dia e por mês
+- Relatórios PDF: Livro Caixa e Resumo Geral (pivot por forma de pagamento e finalidade)
+- CRUD de usuários com controle de acesso por perfil (RBAC)
 - Autenticação via JWT
+
+---
+
+## Perfis de Acesso (RBAC)
+
+| Perfil | Acesso |
+|---|---|
+| `ADMINISTRADOR` | Acesso total ao sistema (lançamentos, conciliação, arquivos, finalidades, usuários, relatórios) |
+| `CONCILIADOR` | Acesso financeiro — lançamentos, conciliação e arquivos. Sem acesso às telas de administração |
+| `REPORTER` | Somente Dashboard (sem navegar para lançamentos) e Relatórios |
+
+Usuários são gerenciados pela tela **Administração → Usuários** (somente ADMINISTRADOR). O usuário de ID 1 (administrador principal) não pode ser excluído, e nenhum usuário pode excluir a si mesmo.
 
 ---
 

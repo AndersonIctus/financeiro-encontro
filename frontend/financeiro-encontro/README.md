@@ -60,13 +60,15 @@ src/
 │   │   ├── conciliacao.service.ts
 │   │   ├── dashboard.service.ts
 │   │   ├── dashboard-state.service.ts  # Estado compartilhado do dashboard
+│   │   ├── relatorio.service.ts        # Download de PDFs (Livro Caixa, Resumo Geral)
+│   │   ├── usuario.service.ts          # CRUD de usuários
 │   │   ├── dto/                # DTOs de filtro para cada endpoint
 │   │   └── util/               # Utilitários (PageTemplate)
 │   ├── general/
-│   │   └── auth/               # Auth interceptor e guard JWT
+│   │   └── auth/               # authGuard (JWT), roleGuard (RBAC), authInterceptor
 │   └── components/             # Componentes por tela (lazy loaded)
 │       ├── login/
-│       ├── main/               # Shell principal com navegação lateral
+│       ├── main/               # Shell principal com navegação lateral filtrada por perfil
 │       ├── dashboard/
 │       │   └── graphs/         # Gráficos Chart.js
 │       │       ├── barra-mensal/
@@ -81,17 +83,38 @@ src/
 │       │       └── conciliacao-card/
 │       ├── arquivos/           # Listagem de extratos importados
 │       ├── administracao/
-│       │   └── finalidades/
-│       │       └── finalidades-form/
-│       └── not-found/
+│       │   ├── finalidades/
+│       │   │   └── finalidades-form/
+│       │   ├── usuarios/       # CRUD de usuários (somente ADMINISTRADOR)
+│       │   │   └── usuarios-form/
+│       │   └── relatorios/     # Geração de PDFs (todos os perfis)
+│       ├── access-denied/      # Página 403 — usuário sem permissão para a rota
+│       └── not-found/          # Página 404 — rota inexistente
 └── styles.scss                 # Estilos globais
 ```
 
 ---
 
-## Autenticação
+## Autenticação e Controle de Acesso
 
-O login é feito via `POST /auth/login`. O token JWT retornado é salvo no `localStorage` e injetado automaticamente em todas as requisições pelo `authInterceptor`. Rotas protegidas usam o `authGuard`.
+O login é feito via `POST /auth/login`. O token JWT retornado é salvo no `localStorage` e injetado automaticamente em todas as requisições pelo `authInterceptor`.
+
+Existem dois guards de rota:
+
+| Guard | Responsabilidade |
+|---|---|
+| `authGuard` | Redireciona para `/login` se não há token válido |
+| `roleGuard` | Verifica o campo `perfil` do usuário contra `route.data.roles`; redireciona para `/access-denied` se o perfil não tem permissão |
+
+### Perfis de Acesso
+
+| Perfil | Telas acessíveis |
+|---|---|
+| `ADMINISTRADOR` | Todas — Dashboard, Lançamentos, Conciliação, Arquivos, Finalidades, Usuários, Relatórios |
+| `CONCILIADOR` | Dashboard, Lançamentos, Conciliação, Arquivos, Relatórios |
+| `REPORTER` | Dashboard (sem navegar para lançamentos ao clicar nas linhas) e Relatórios |
+
+O menu lateral (`MainComponent`) filtra automaticamente as seções e itens pelo perfil do usuário logado. O modelo `PerfilUsuario` e as constantes `Perfil` estão em `models/constants/perfil.ts`.
 
 ---
 

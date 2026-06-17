@@ -4,6 +4,10 @@ from sqlalchemy import text
 from app.models.finalidade import Finalidade
 from app.models.enums import TipoLancamento
 
+# ATENÇÃO: Os IDs e nomes abaixo são referenciados diretamente em
+# relatorio_service.py (_RESUMO_RECEITA_ROWS / _RESUMO_DESPESA_ROWS) para
+# gerar o relatório "Resumo Geral". NÃO altere IDs nem nomes sem atualizar
+# também as constantes correspondentes no serviço de relatórios.
 DEFAULT_FINALIDADES = [
     # ── RECEITA ──────────────────────────────────────────────────────────────
     {"id": 1,   "nome": "OFERTA",               "tipo": TipoLancamento.RECEITA},
