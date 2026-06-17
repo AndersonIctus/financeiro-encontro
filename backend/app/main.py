@@ -20,6 +20,7 @@ from app.routers.dashboard_router import router as dashboard_router
 from app.routers.extrato_bancario_router import router as extrato_bancario_router
 from app.routers.finalidade_router import router as finalidade_router
 from app.routers.lancamento_router import router as lancamento_router
+from app.routers.relatorio_router import router as relatorio_router
 
 
 @asynccontextmanager
@@ -64,6 +65,7 @@ app.include_router(finalidade_router, **_protected)
 app.include_router(extrato_bancario_router, **_protected)
 app.include_router(conciliacao_router, **_protected)
 app.include_router(dashboard_router, **_protected)
+app.include_router(relatorio_router, **_protected)
 
 
 @app.get("/health")
