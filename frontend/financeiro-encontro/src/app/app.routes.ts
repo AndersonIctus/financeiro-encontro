@@ -17,6 +17,10 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
+        path: 'acesso-negado',
+        loadComponent: () => import('./components/access-denied/access-denied.component').then(m => m.AccessDeniedComponent),
+      },
+      {
         path: 'dashboard',
         loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
