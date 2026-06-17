@@ -16,7 +16,7 @@ from reportlab.platypus import (
 )
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.enums import TipoLancamento
+from app.models.enums import FormaPagamento, TipoLancamento
 from app.models.lancamento import Lancamento
 
 _COR_PRIMARIA  = colors.HexColor("#1a237e")
@@ -24,6 +24,54 @@ _COR_LINHA_PAR = colors.HexColor("#f0f4ff")
 _COR_TOTAIS    = colors.HexColor("#e8eaf6")
 _COR_RECEITA   = colors.HexColor("#1b5e20")
 _COR_DESPESA   = colors.HexColor("#b71c1c")
+_COR_TOTAL_COL = colors.HexColor("#e0e0e0")
+_COR_TOTAL_ROW = colors.HexColor("#bdbdbd")
+
+_RESUMO_RECEITA_ROWS = [
+    ("Encontristas", frozenset([3])),
+    ("Encontreiros", frozenset([4])),
+    ("Outros",       frozenset([1, 2, 5])),
+]
+
+_RESUMO_DESPESA_ROWS = [
+    ("CAMISAS",    frozenset([101])),
+    ("COMPRAS",    frozenset([105])),
+    ("CERIMONIAL", frozenset([102])),
+    ("GERAL",      frozenset([108])),
+    ("Outros",     frozenset([103, 104, 106, 107, 109, 110, 111, 112, 113, 114])),
+]
+
+_PIVOT_COL_WIDTHS = [50 * mm, 32 * mm, 32 * mm, 32 * mm, 34 * mm]
+
+
+def _build_pivot_style() -> TableStyle:
+    return TableStyle([
+        ("BACKGROUND", (0, 0),  (-1, 0),  _COR_PRIMARIA),
+        ("TEXTCOLOR",  (0, 0),  (-1, 0),  colors.white),
+        ("FONTNAME",   (0, 0),  (-1, 0),  "Helvetica-Bold"),
+        ("FONTSIZE",   (0, 0),  (-1, 0),  9),
+        ("ALIGN",      (0, 0),  (-1, 0),  "CENTER"),
+        ("FONTNAME",   (0, 1),  (-1, -1), "Helvetica"),
+        ("FONTSIZE",   (0, 1),  (-1, -1), 9),
+        ("ALIGN",      (0, 1),  (0,  -1), "LEFT"),
+        ("ALIGN",      (1, 1),  (-1, -1), "RIGHT"),
+        # Total column gray (data rows only — range is empty for 2-row tables, safe)
+        ("BACKGROUND", (4, 1),  (4,  -2), _COR_TOTAL_COL),
+        # Total / saldo row
+        ("BACKGROUND", (0, -1), (-1, -1), _COR_TOTAL_ROW),
+        ("FONTNAME",   (0, -1), (-1, -1), "Helvetica-Bold"),
+        # Grand total cell: black, white bold
+        ("BACKGROUND", (4, -1), (4,  -1), colors.black),
+        ("TEXTCOLOR",  (4, -1), (4,  -1), colors.white),
+        ("GRID",       (0, 0),  (-1, -1), 0.3, colors.HexColor("#cccccc")),
+        ("LINEBELOW",  (0, 0),  (-1, 0),  1, colors.white),
+        ("LINEABOVE",  (0, -1), (-1, -1), 1, _COR_PRIMARIA),
+        ("VALIGN",         (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING",     (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING",  (0, 0), (-1, -1), 4),
+        ("LEFTPADDING",    (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING",   (0, 0), (-1, -1), 6),
+    ])
 
 
 def _brl(value: float) -> str:
@@ -180,6 +228,125 @@ class RelatorioService:
             f"Emitido em {datetime.now().strftime('%d/%m/%Y às %H:%M')}",
             rodape_style,
         ))
+
+        doc.build(story)
+        return buffer.getvalue()
+
+    @staticmethod
+    def gerar_resumo_geral(db: Session, data_inicio: date, data_fim: date) -> bytes:
+        lancamentos = (
+            db.query(Lancamento)
+            .filter(Lancamento.data_pagamento >= data_inicio)
+            .filter(Lancamento.data_pagamento <= data_fim)
+            .all()
+        )
+
+        # ── Aggregate ──────────────────────────────────────────────────────
+        _COLS = ("dinheiro", "pix", "cartao")
+        rec: dict[str, dict[str, float]] = {lb: dict.fromkeys(_COLS, 0.0) for lb, _ in _RESUMO_RECEITA_ROWS}
+        des: dict[str, dict[str, float]] = {lb: dict.fromkeys(_COLS, 0.0) for lb, _ in _RESUMO_DESPESA_ROWS}
+
+        def _ck(forma: FormaPagamento) -> str:
+            if forma == FormaPagamento.DINHEIRO:
+                return "dinheiro"
+            if forma == FormaPagamento.PIX:
+                return "pix"
+            return "cartao"
+
+        def _row_label(fid, rows):
+            if fid is not None:
+                for lb, ids in rows:
+                    if fid in ids:
+                        return lb
+            return "Outros"
+
+        for lanc in lancamentos:
+            ck = _ck(lanc.forma_pagamento)
+            if lanc.tipo == TipoLancamento.RECEITA:
+                rec[_row_label(lanc.finalidade_id, _RESUMO_RECEITA_ROWS)][ck] += float(lanc.valor)
+            else:
+                des[_row_label(lanc.finalidade_id, _RESUMO_DESPESA_ROWS)][ck] += float(lanc.valor)
+
+        # ── Compute section totals ─────────────────────────────────────────
+        rec_tot = {c: sum(rec[lb][c] for lb, _ in _RESUMO_RECEITA_ROWS) for c in _COLS}
+        des_tot = {c: sum(des[lb][c] for lb, _ in _RESUMO_DESPESA_ROWS) for c in _COLS}
+        rec_grand = sum(rec_tot.values())
+        des_grand = sum(des_tot.values())
+
+        # ── Build table row lists ──────────────────────────────────────────
+        _hdr = ["", "DINHEIRO", "PIX", "CARTÃO", "TOTAL"]
+
+        def _section_rows(row_defs, matrix, totals):
+            rows = [_hdr]
+            for lb, _ in row_defs:
+                m = matrix[lb]
+                rows.append([lb, _brl(m["dinheiro"]), _brl(m["pix"]), _brl(m["cartao"]),
+                              _brl(m["dinheiro"] + m["pix"] + m["cartao"])])
+            rows.append(["TOTAL", _brl(totals["dinheiro"]), _brl(totals["pix"]),
+                          _brl(totals["cartao"]), _brl(sum(totals.values()))])
+            return rows
+
+        rec_rows = _section_rows(_RESUMO_RECEITA_ROWS, rec, rec_tot)
+        des_rows = _section_rows(_RESUMO_DESPESA_ROWS, des, des_tot)
+
+        saldo = {c: rec_tot[c] - des_tot[c] for c in _COLS}
+        sal_rows = [
+            _hdr,
+            ["SALDO", _brl(saldo["dinheiro"]), _brl(saldo["pix"]), _brl(saldo["cartao"]),
+             _brl(rec_grand - des_grand)],
+        ]
+
+        # ── PDF layout ─────────────────────────────────────────────────────
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            leftMargin=15 * mm, rightMargin=15 * mm,
+            topMargin=20 * mm, bottomMargin=20 * mm,
+        )
+
+        _t = ParagraphStyle("t_rg", fontName="Helvetica-Bold", fontSize=16,
+                             textColor=_COR_PRIMARIA, alignment=TA_CENTER, spaceAfter=2 * mm)
+        _s = ParagraphStyle("s_rg", fontName="Helvetica-Bold", fontSize=12,
+                             textColor=_COR_PRIMARIA, alignment=TA_CENTER, spaceAfter=2 * mm)
+        _i = ParagraphStyle("i_rg", fontName="Helvetica", fontSize=9,
+                             textColor=colors.grey, alignment=TA_CENTER, spaceAfter=5 * mm)
+        _sec_rec = ParagraphStyle("sec_rec", fontName="Helvetica-Bold", fontSize=11,
+                                   textColor=_COR_RECEITA, spaceAfter=2 * mm)
+        _sec_des = ParagraphStyle("sec_des", fontName="Helvetica-Bold", fontSize=11,
+                                   textColor=_COR_DESPESA, spaceAfter=2 * mm)
+        _sec_sal = ParagraphStyle("sec_sal", fontName="Helvetica-Bold", fontSize=11,
+                                   textColor=_COR_PRIMARIA, spaceAfter=2 * mm)
+        _rod = ParagraphStyle("rod_rg", fontName="Helvetica", fontSize=8,
+                               textColor=colors.grey, alignment=TA_RIGHT)
+
+        def _pivot(rows):
+            t = Table(rows, colWidths=_PIVOT_COL_WIDTHS)
+            t.setStyle(_build_pivot_style())
+            return t
+
+        story = [
+            Paragraph("Encontro com Cristo", _t),
+            Paragraph("RESUMO GERAL", _s),
+            Paragraph(
+                f"Período: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}",
+                _i,
+            ),
+            HRFlowable(width="100%", thickness=1, color=_COR_PRIMARIA, spaceAfter=5 * mm),
+            Paragraph("RECEITAS", _sec_rec),
+            _pivot(rec_rows),
+            Spacer(1, 6 * mm),
+            Paragraph("DESPESAS", _sec_des),
+            _pivot(des_rows),
+            Spacer(1, 6 * mm),
+            Paragraph("SALDO", _sec_sal),
+            _pivot(sal_rows),
+            Spacer(1, 8 * mm),
+            Paragraph(
+                f"Emitido em {datetime.now().strftime('%d/%m/%Y às %H:%M')}",
+                _rod,
+            ),
+        ]
 
         doc.build(story)
         return buffer.getvalue()

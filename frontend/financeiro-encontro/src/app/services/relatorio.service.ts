@@ -16,4 +16,11 @@ export class RelatorioService extends AbstractService {
       responseType: 'blob',
     });
   }
+
+  gerarResumoGeral(dataInicio: string, dataFim: string): Observable<Blob> {
+    return this.getCustom<Blob>('/resumo-geral', {
+      params: { data_inicio: dataInicio, data_fim: dataFim },
+      responseType: 'blob',
+    });
+  }
 }

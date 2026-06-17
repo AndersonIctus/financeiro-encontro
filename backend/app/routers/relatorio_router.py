@@ -23,3 +23,18 @@ def livro_caixa(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{nome}"'},
     )
+
+
+@router.get("/resumo-geral")
+def resumo_geral(
+    data_inicio: date = Query(...),
+    data_fim: date = Query(...),
+    db: Session = Depends(get_db),
+):
+    pdf = RelatorioService.gerar_resumo_geral(db, data_inicio, data_fim)
+    nome = f"resumo-geral-{data_inicio}-{data_fim}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{nome}"'},
+    )

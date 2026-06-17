@@ -23,9 +23,15 @@ export class RelatoriosComponent {
   private relatorioService = inject(RelatorioService);
   private toast           = inject(ToastService);
 
-  gerandoLivroCaixa = false;
+  gerandoLivroCaixa  = false;
+  gerandoResumoGeral = false;
 
   formLivroCaixa: FormGroup = this.fb.group({
+    data_inicio: [moment().startOf('month'), Validators.required],
+    data_fim:    [moment(),                  Validators.required],
+  });
+
+  formResumoGeral: FormGroup = this.fb.group({
     data_inicio: [moment().startOf('month'), Validators.required],
     data_fim:    [moment(),                  Validators.required],
   });
@@ -40,12 +46,7 @@ export class RelatoriosComponent {
     this.gerandoLivroCaixa = true;
     this.relatorioService.gerarLivroCaixa(inicio, fim).subscribe({
       next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const a   = document.createElement('a');
-        a.href     = url;
-        a.download = `livro-caixa-${inicio}-${fim}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
+        this._download(blob, `livro-caixa-${inicio}-${fim}.pdf`);
         this.gerandoLivroCaixa = false;
       },
       error: () => {
@@ -53,5 +54,34 @@ export class RelatoriosComponent {
         this.gerandoLivroCaixa = false;
       },
     });
+  }
+
+  gerarResumoGeral(): void {
+    if (this.formResumoGeral.invalid) return;
+
+    const { data_inicio, data_fim } = this.formResumoGeral.value;
+    const inicio = moment(data_inicio).format('YYYY-MM-DD');
+    const fim    = moment(data_fim).format('YYYY-MM-DD');
+
+    this.gerandoResumoGeral = true;
+    this.relatorioService.gerarResumoGeral(inicio, fim).subscribe({
+      next: (blob) => {
+        this._download(blob, `resumo-geral-${inicio}-${fim}.pdf`);
+        this.gerandoResumoGeral = false;
+      },
+      error: () => {
+        this.toast.error({ message: 'Erro ao gerar o relatório.' });
+        this.gerandoResumoGeral = false;
+      },
+    });
+  }
+
+  private _download(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }
