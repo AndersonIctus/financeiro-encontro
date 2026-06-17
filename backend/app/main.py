@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import APP_PORT, CORS_ORIGINS
 from app.core.deps import get_current_user
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 
 from app.database.seeds.main_seeds import run_seed
 from app.database.session import SessionLocal
