@@ -54,6 +54,10 @@ export const routes: Routes = [
         path: 'administracao',
         children: [
           {
+            path: 'relatorios',
+            loadComponent: () => import('./components/administracao/relatorios/relatorios.component').then(m => m.RelatoriosComponent),
+          },
+          {
             path: 'finalidades',
             children: [
               {
