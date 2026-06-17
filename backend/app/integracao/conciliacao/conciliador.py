@@ -20,10 +20,10 @@ class Conciliador:
         return hashlib.md5(base.encode()).hexdigest()
 
     @staticmethod
-    def processar(file_path: str, nome_arquivo: str, is_duplicado_callback):
+    def processar(conteudo: str, nome_arquivo: str, is_duplicado_callback):
         parser = ParserFactory.get_parser(nome_arquivo)
 
-        registros = parser.parse(file_path)
+        registros = parser.parse(conteudo)
 
         novos: list[ConciliacaoDTO] = []
         duplicados = []

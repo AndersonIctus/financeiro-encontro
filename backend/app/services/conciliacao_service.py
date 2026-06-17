@@ -1,7 +1,5 @@
-import os
 from sqlalchemy.orm import Session
 
-from app.core.config import UPLOAD_FOLDER
 from app.integracao.conciliacao.conciliador import Conciliador
 from app.services.extrato_bancario_service import ExtratoBancarioService
 from app.services.lancamento_service import LancamentoService
@@ -91,25 +89,20 @@ class ConciliacaoService:
         if not file.filename.endswith(".csv"):
             raise Exception("Arquivo deve ser CSV")
 
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-
-        conteudo_bytes = file.file.read()
-
         try:
+            conteudo_bytes = file.file.read()
+            if len(conteudo_bytes) > 3 * 1024 * 1024:
+                raise Exception("Arquivo está acima do limite permitido de tamanho de dados")
             conteudo = conteudo_bytes.decode('utf-8')
         except UnicodeDecodeError:
             raise Exception(
                 "Erro ao processar arquivo. Utilize o charset UTF-8 para evitar problemas de acentuação."
             )
 
-        with open(file_path, "w", encoding="utf-8") as buffer:
-            buffer.write(conteudo)
-
         extrato = ExtratoBancarioService.create(db, {
             "nome_arquivo": file.filename,
-            "caminho_arquivo": file_path,
-            "tamanho_bytes": os.path.getsize(file_path),
+            "conteudo_csv": conteudo,
+            "tamanho_bytes": len(conteudo.encode('utf-8')),
             "status": StatusProcessamento.PROCESSANDO,
         })
 
@@ -119,7 +112,7 @@ class ConciliacaoService:
                 return LancamentoService.exists_by_hash(db, data["hash_transacao"])
 
             resultado = Conciliador.processar(
-                file_path,
+                conteudo,
                 file.filename,
                 is_duplicado,
             )

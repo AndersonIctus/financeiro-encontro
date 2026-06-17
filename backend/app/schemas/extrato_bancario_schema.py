@@ -5,7 +5,6 @@ from datetime import datetime
 class ExtratoBancarioResponse(BaseModel):
     id: int
     nome_arquivo: str
-    caminho_arquivo: str
     tamanho_bytes: int | None
     processado_em: datetime
 

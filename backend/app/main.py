@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 
+from alembic.config import Config
+from alembic import command
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,6 +21,9 @@ from app.routers.lancamento_router import router as lancamento_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+
     db = SessionLocal()
     try:
         run_seed(db)

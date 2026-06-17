@@ -16,7 +16,7 @@ class ExtratoBancario(Base):
 
     id = Column(Integer, primary_key=True)
     nome_arquivo = Column(String(255), nullable=False)
-    caminho_arquivo = Column(String(500), nullable=False)
+    conteudo_csv = Column(String, nullable=True)
     tamanho_bytes = Column(Integer, nullable=True)
     processado_em = Column(DateTime(timezone=True), server_default=func.now())
     status = Column(status_enum, nullable=False, server_default="PROCESSANDO")

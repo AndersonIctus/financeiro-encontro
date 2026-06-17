@@ -1,7 +1,5 @@
-import os
-
 from fastapi import APIRouter, Depends
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -40,12 +38,12 @@ def get_by_id(extrato_id: int, db: Session = Depends(get_db)):
 @router.get("/{extrato_id}/download")
 def download(extrato_id: int, db: Session = Depends(get_db)):
     extrato = ExtratoBancarioService.get_by_id(db, extrato_id)
-    if not os.path.exists(extrato.caminho_arquivo):
+    if not extrato.conteudo_csv:
         raise NotFoundException("Arquivo não encontrado no servidor")
-    return FileResponse(
-        path=extrato.caminho_arquivo,
-        filename=extrato.nome_arquivo,
+    return Response(
+        content=extrato.conteudo_csv,
         media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={extrato.nome_arquivo}"},
     )
 
 

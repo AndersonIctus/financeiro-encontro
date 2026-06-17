@@ -16,19 +16,14 @@ class BancoInterParser(BaseParser):
 
         return "saida"
 
-    def parse(self, file_path: str) -> list[ConciliacaoDTO]:
+    def parse(self, conteudo: str) -> list[ConciliacaoDTO]:
         import csv
+        import io
 
         result = []
         erros = []
 
-        # Tentar UTF-8 primeiro, fallback para latin-1
-        try:
-            csvfile = open(file_path, encoding="utf-8")
-        except UnicodeDecodeError:
-            csvfile = open(file_path, encoding="latin-1")
-        
-        with csvfile:
+        with io.StringIO(conteudo) as csvfile:
             reader = csv.reader(csvfile, delimiter=";")
 
             header_found = False

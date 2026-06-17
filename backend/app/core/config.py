@@ -5,7 +5,6 @@ DATABASE_URL = os.getenv(
     "postgresql://db_financeiro:fin_pass@localhost:5432/financeiro_encontro"
 )
 
-UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
 APP_PORT = int(os.getenv("APP_PORT", "8000"))
 
 JWT_SECRET = os.getenv("JWT_SECRET", "changeme-insecure-secret")

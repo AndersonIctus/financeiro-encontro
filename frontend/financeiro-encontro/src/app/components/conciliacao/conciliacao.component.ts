@@ -76,6 +76,11 @@ export class ConciliacaoComponent {
       return;
     }
 
+    if (file.size > 3 * 1024 * 1024) {
+      this.toast.error({ message: 'Arquivo está acima do limite permitido de tamanho de dados (3 MB).' });
+      return;
+    }
+
     this.uploading = true;
     this.conciliacaoService.upload(file).subscribe({
       next: (resultado) => {
