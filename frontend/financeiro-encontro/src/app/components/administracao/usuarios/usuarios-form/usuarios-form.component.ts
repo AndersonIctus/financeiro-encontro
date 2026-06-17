@@ -10,6 +10,7 @@ import {
 import { ToastService }      from '../../../../shared/components/toast/toast.service';
 import { ErrorHandlerService } from '../../../../shared/services/error-handler.service';
 import { UsuarioService }    from '../../../../services/usuario.service';
+import { Perfil }            from '../../../../models/constants/perfil';
 
 @Component({
   selector: 'app-usuarios-form',
@@ -33,12 +34,15 @@ export class UsuariosFormComponent implements OnInit {
   usuarioId: number | null = null;
   senhaVisivel = false;
 
+  readonly perfilOpcoes = Perfil.opcoes;
+
   ngOnInit(): void {
     this.form = this.fb.group({
-      nome:  ['', [Validators.required, Validators.maxLength(100)]],
-      email: ['', [Validators.required, Validators.email]],
-      senha: ['', Validators.required],
-      ativo: [true],
+      nome:   ['', [Validators.required, Validators.maxLength(100)]],
+      email:  ['', [Validators.required, Validators.email]],
+      senha:  ['', Validators.required],
+      perfil: [Perfil.CONCILIADOR, Validators.required],
+      ativo:  [true],
     });
 
     const id = this.route.snapshot.params['id'];
@@ -55,7 +59,7 @@ export class UsuariosFormComponent implements OnInit {
     this.loading = true;
     this.usuarioService.buscarPorId(id).subscribe({
       next: (data) => {
-        this.form.patchValue({ nome: data.nome, email: data.email, ativo: data.ativo });
+        this.form.patchValue({ nome: data.nome, email: data.email, ativo: data.ativo, perfil: data.perfil });
         this.loading = false;
       },
       error: (err) => {
@@ -77,12 +81,12 @@ export class UsuariosFormComponent implements OnInit {
       return;
     }
 
-    const { nome, email, senha, ativo } = this.form.value;
+    const { nome, email, senha, perfil, ativo } = this.form.value;
     this.saving = true;
 
     const req$ = this.updatePage && this.usuarioId
-      ? this.usuarioService.editar(this.usuarioId, { nome, email, ativo, ...(senha ? { senha } : {}) })
-      : this.usuarioService.criar({ nome, email, senha, ativo });
+      ? this.usuarioService.editar(this.usuarioId, { nome, email, perfil, ativo, ...(senha ? { senha } : {}) })
+      : this.usuarioService.criar({ nome, email, senha, perfil, ativo });
 
     const msg = this.updatePage ? 'Usuário atualizado com sucesso.' : 'Usuário criado com sucesso.';
 

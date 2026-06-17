@@ -21,3 +21,9 @@ class StatusProcessamento(str, Enum):
     PROCESSANDO = "PROCESSANDO"
     PROCESSADO = "PROCESSADO"
     ERRO = "ERRO"
+
+
+class PerfilUsuario(str, Enum):
+    ADMINISTRADOR = "ADMINISTRADOR"
+    CONCILIADOR   = "CONCILIADOR"
+    REPORTER      = "REPORTER"

@@ -51,6 +51,18 @@
           }
         </mat-form-field>
 
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Perfil</mat-label>
+          <mat-select formControlName="perfil">
+            @for (op of perfilOpcoes; track op.value) {
+              <mat-option [value]="op.value">{{ op.label }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('perfil')?.hasError('required') && form.get('perfil')?.touched) {
+            <mat-error>Perfil é obrigatório</mat-error>
+          }
+        </mat-form-field>
+
         <div class="flex items-center gap-2 mb-2">
           <mat-slide-toggle formControlName="ativo" color="primary">
             Usuário ativo

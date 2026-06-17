@@ -32,6 +32,7 @@ class UsuarioService:
             "email":      data.email,
             "senha_hash": hash_password(data.senha),
             "ativo":      data.ativo,
+            "perfil":     data.perfil,
         })
 
     @staticmethod
@@ -42,7 +43,7 @@ class UsuarioService:
         if existing and existing.id != usuario_id:
             raise BadRequestException("Já existe um usuário com este e-mail")
 
-        update_data: dict = {"nome": data.nome, "email": data.email, "ativo": data.ativo}
+        update_data: dict = {"nome": data.nome, "email": data.email, "ativo": data.ativo, "perfil": data.perfil}
         if data.senha:
             update_data["senha_hash"] = hash_password(data.senha)
 

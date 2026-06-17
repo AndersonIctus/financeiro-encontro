@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './general/auth/auth.guard';
+import { roleGuard }  from './general/auth/role.guard';
+
+const ADMIN       = ['ADMINISTRADOR'];
+const ADMIN_CONC  = ['ADMINISTRADOR', 'CONCILIADOR'];
 
 export const routes: Routes = [
   {
@@ -18,6 +22,8 @@ export const routes: Routes = [
       },
       {
         path: 'lancamentos',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_CONC },
         children: [
           {
             path: '',
@@ -35,6 +41,8 @@ export const routes: Routes = [
       },
       {
         path: 'conciliacao',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_CONC },
         children: [
           {
             path: '',
@@ -48,6 +56,8 @@ export const routes: Routes = [
       },
       {
         path: 'arquivos',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_CONC },
         loadComponent: () => import('./components/arquivos/arquivos.component').then(m => m.ArquivosComponent),
       },
       {
@@ -59,6 +69,8 @@ export const routes: Routes = [
           },
           {
             path: 'usuarios',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN },
             children: [
               {
                 path: '',
@@ -76,6 +88,8 @@ export const routes: Routes = [
           },
           {
             path: 'finalidades',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN },
             children: [
               {
                 path: '',

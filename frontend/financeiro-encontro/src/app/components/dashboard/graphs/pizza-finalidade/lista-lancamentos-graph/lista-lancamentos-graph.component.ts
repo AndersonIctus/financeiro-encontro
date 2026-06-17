@@ -13,8 +13,9 @@ import { Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 
 import { MaterialGlobalModule } from '../../../../../shared/modules/material.imports.module';
-import { LancamentoService } from '../../../../../services/lancamento.service';
-import { DashboardStateService } from '../../../../../services/dashboard-state.service';
+import { LancamentoService }      from '../../../../../services/lancamento.service';
+import { DashboardStateService }  from '../../../../../services/dashboard-state.service';
+import { AuthService }            from '../../../../../services/auth.service';
 import { Lancamento } from '../../../../../models/lancamento.model';
 import { DashboardFilterDto } from '../../../../../services/dto/dashboard-filter.dto';
 import { LancamentoFilterDto } from '../../../../../services/dto/lancamento-filter.dto';
@@ -46,6 +47,7 @@ export class ListaLancamentosGraphComponent implements OnInit, OnChanges {
   private stateService      = inject(DashboardStateService);
   private router            = inject(Router);
   private cdr               = inject(ChangeDetectorRef);
+  private authService       = inject(AuthService);
 
   ngOnInit(): void {
     this.pageIndex = this.tipo === 'RECEITA'
@@ -110,6 +112,7 @@ export class ListaLancamentosGraphComponent implements OnInit, OnChanges {
   }
 
   onRowClick(row: Lancamento): void {
+    if (this.authService.getUsuario()?.perfil === 'REPORTER') return;
     this.router.navigate(['/lancamentos', row.id, 'editar'], {
       state: { returnUrl: this.router.url },
     });

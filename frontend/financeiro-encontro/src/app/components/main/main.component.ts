@@ -7,15 +7,19 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { Usuario } from '../../models/usuario.model';
 
+import { PerfilUsuario } from '../../models/usuario.model';
+
 interface NavItem {
   label: string;
   icon: string;
   route: string;
+  roles?: PerfilUsuario[];
 }
 
 interface NavSection {
   title: string;
   items: NavItem[];
+  roles?: PerfilUsuario[];
 }
 
 @Component({
@@ -34,7 +38,7 @@ export class MainComponent implements OnInit{
 
   usuario: Usuario | null = null;
 
-  navSections: NavSection[] = [
+  private readonly _allSections: NavSection[] = [
     {
       title: 'Painel',
       items: [
@@ -43,13 +47,15 @@ export class MainComponent implements OnInit{
     },
     {
       title: 'Financeiro',
+      roles: ['ADMINISTRADOR', 'CONCILIADOR'],
       items: [
-        { label: 'Lançamentos', icon: 'receipt_long',  route: '/lancamentos' },
-        { label: 'Conciliação',  icon: 'sync_alt',      route: '/conciliacao' },
+        { label: 'Lançamentos', icon: 'receipt_long', route: '/lancamentos' },
+        { label: 'Conciliação', icon: 'sync_alt',     route: '/conciliacao' },
       ],
     },
     {
       title: 'Arquivos',
+      roles: ['ADMINISTRADOR', 'CONCILIADOR'],
       items: [
         { label: 'Arquivos Enviados', icon: 'folder_open', route: '/arquivos' },
       ],
@@ -57,12 +63,23 @@ export class MainComponent implements OnInit{
     {
       title: 'Administração',
       items: [
-        { label: 'Finalidades', icon: 'label',         route: '/administracao/finalidades' },
-        { label: 'Usuários',    icon: 'group',         route: '/administracao/usuarios'    },
-        { label: 'Relatórios',  icon: 'picture_as_pdf', route: '/administracao/relatorios'  },
+        { label: 'Finalidades', icon: 'label',          route: '/administracao/finalidades', roles: ['ADMINISTRADOR'] },
+        { label: 'Usuários',    icon: 'group',           route: '/administracao/usuarios',    roles: ['ADMINISTRADOR'] },
+        { label: 'Relatórios',  icon: 'picture_as_pdf',  route: '/administracao/relatorios'                           },
       ],
     },
   ];
+
+  get navSections(): NavSection[] {
+    const perfil = this.usuario?.perfil;
+    return this._allSections
+      .filter(s => !s.roles || (perfil && s.roles.includes(perfil as PerfilUsuario)))
+      .map(s => ({
+        ...s,
+        items: s.items.filter(i => !i.roles || (perfil && i.roles.includes(perfil as PerfilUsuario))),
+      }))
+      .filter(s => s.items.length > 0);
+  }
 
   get nomeExibido(): string {
     const nome = this.usuario?.nome ?? '';
