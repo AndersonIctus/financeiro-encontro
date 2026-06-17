@@ -1,0 +1,72 @@
+<div class="p-6 max-w-lg">
+
+  <!-- ─── Header ─────────────────────────────────────────────────────────────── -->
+  <div class="flex items-center gap-3 mb-6">
+    <button mat-icon-button (click)="voltar()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="text-2xl font-medium text-on-surface">
+      {{ updatePage ? 'Editar Usuário' : 'Novo Usuário' }}
+    </h1>
+  </div>
+
+  @if (loading) {
+    <mat-progress-bar mode="indeterminate" class="mb-4" />
+  }
+
+  <!-- ─── Formulário ──────────────────────────────────────────────────────────── -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="pt-4">
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="flex flex-col gap-1">
+
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="nome" placeholder="Nome completo" />
+          @if (form.get('nome')?.hasError('required') && form.get('nome')?.touched) {
+            <mat-error>Nome é obrigatório</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>E-mail</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="email@exemplo.com" />
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>E-mail é obrigatório</mat-error>
+          }
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>E-mail inválido</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Senha</mat-label>
+          <input matInput formControlName="senha"
+                 [type]="senhaVisivel ? 'text' : 'password'"
+                 [placeholder]="updatePage ? 'Deixe em branco para manter a senha atual' : 'Senha de acesso'" />
+          <button mat-icon-button matSuffix type="button" (click)="senhaVisivel = !senhaVisivel">
+            <mat-icon>{{ senhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('senha')?.hasError('required') && form.get('senha')?.touched) {
+            <mat-error>Senha é obrigatória</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="flex items-center gap-2 mb-2">
+          <mat-slide-toggle formControlName="ativo" color="primary">
+            Usuário ativo
+          </mat-slide-toggle>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-2">
+          <button mat-stroked-button type="button" (click)="voltar()">Cancelar</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+            @if (saving) { <mat-spinner diameter="18" /> }
+            {{ updatePage ? 'Salvar alterações' : 'Criar usuário' }}
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+</div>

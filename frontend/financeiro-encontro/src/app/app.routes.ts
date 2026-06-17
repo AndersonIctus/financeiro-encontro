@@ -58,6 +58,23 @@ export const routes: Routes = [
             loadComponent: () => import('./components/administracao/relatorios/relatorios.component').then(m => m.RelatoriosComponent),
           },
           {
+            path: 'usuarios',
+            children: [
+              {
+                path: '',
+                loadComponent: () => import('./components/administracao/usuarios/usuarios.component').then(m => m.UsuariosComponent),
+              },
+              {
+                path: 'novo',
+                loadComponent: () => import('./components/administracao/usuarios/usuarios-form/usuarios-form.component').then(m => m.UsuariosFormComponent),
+              },
+              {
+                path: ':id/editar',
+                loadComponent: () => import('./components/administracao/usuarios/usuarios-form/usuarios-form.component').then(m => m.UsuariosFormComponent),
+              },
+            ],
+          },
+          {
             path: 'finalidades',
             children: [
               {
